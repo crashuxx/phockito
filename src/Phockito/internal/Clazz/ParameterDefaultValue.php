@@ -3,7 +3,7 @@
 namespace Phockito\internal\Clazz;
 
 
-interface MethodParameterDefaultValue 
+interface ParameterDefaultValue
 {
     /**
      * @return mixed

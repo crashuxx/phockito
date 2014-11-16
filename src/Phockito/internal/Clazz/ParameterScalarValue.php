@@ -3,7 +3,7 @@
 namespace Phockito\internal\Clazz;
 
 
-class MethodParameterScalarValue implements MethodParameterDefaultValue
+class ParameterScalarValue implements ParameterDefaultValue
 {
     private $value;
 

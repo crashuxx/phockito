@@ -5,11 +5,11 @@ namespace Phockito\internal\Clazz;
 
 use stdClass;
 
-class MethodParameterScalarValueTest extends \PHPUnit_Framework_TestCase
+class ParameterScalarValueTest extends \PHPUnit_Framework_TestCase
 {
     public function testNullValue()
     {
-        $methodDefaultValue = new MethodParameterScalarValue(null);
+        $methodDefaultValue = new ParameterScalarValue(null);
 
         $this->assertEquals(null, $methodDefaultValue->getValue());
         $this->assertEquals('NULL', $methodDefaultValue->exportValue());
@@ -17,7 +17,7 @@ class MethodParameterScalarValueTest extends \PHPUnit_Framework_TestCase
 
     public function testNumericValue()
     {
-        $methodDefaultValue = new MethodParameterScalarValue(123);
+        $methodDefaultValue = new ParameterScalarValue(123);
 
         $this->assertEquals(123, $methodDefaultValue->getValue());
         $this->assertEquals('123', $methodDefaultValue->exportValue());
@@ -25,7 +25,7 @@ class MethodParameterScalarValueTest extends \PHPUnit_Framework_TestCase
 
     public function testStringValue()
     {
-        $methodDefaultValue = new MethodParameterScalarValue('lorem isum');
+        $methodDefaultValue = new ParameterScalarValue('lorem isum');
 
         $this->assertEquals('lorem isum', $methodDefaultValue->getValue());
         $this->assertEquals("'lorem isum'", $methodDefaultValue->exportValue());
@@ -36,7 +36,7 @@ class MethodParameterScalarValueTest extends \PHPUnit_Framework_TestCase
      */
     public function testNotEmptyValueThrowsException()
     {
-        new MethodParameterScalarValue([1]);
+        new ParameterScalarValue([1]);
     }
 
     /**
@@ -44,7 +44,7 @@ class MethodParameterScalarValueTest extends \PHPUnit_Framework_TestCase
      */
     public function testObjectValueThrowsException()
     {
-        new MethodParameterScalarValue(new stdClass);
+        new ParameterScalarValue(new stdClass);
     }
 }
  

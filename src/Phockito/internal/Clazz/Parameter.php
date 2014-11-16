@@ -5,7 +5,7 @@ namespace Phockito\internal\Clazz;
 
 use Hamcrest\Matcher;
 
-class MethodParameter
+class Parameter
 {
     /**
      * @var string
@@ -16,7 +16,7 @@ class MethodParameter
      */
     private $type;
     /**
-     * @var null|MethodParameterScalarValue
+     * @var null|ParameterScalarValue
      */
     private $defaultValue;
     /**
@@ -31,10 +31,10 @@ class MethodParameter
     /**
      * @param string $name
      * @param Type $type
-     * @param MethodParameterScalarValue|null $defaultValue
+     * @param ParameterScalarValue|null $defaultValue
      * @param bool $asReference
      */
-    function __construct($name, Type $type, MethodParameterScalarValue $defaultValue = null, $asReference = false)
+    function __construct($name, Type $type, ParameterScalarValue $defaultValue = null, $asReference = false)
     {
         $this->name = $name;
         $this->type = $type;
@@ -59,7 +59,7 @@ class MethodParameter
     }
 
     /**
-     * @return null|MethodParameterScalarValue
+     * @return null|ParameterScalarValue
      */
     public function getDefaultValue()
     {
