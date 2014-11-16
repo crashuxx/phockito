@@ -11,7 +11,7 @@ class TypeTest extends \PHPUnit_Framework_TestCase
     {
         $type = new Type('string', new IsAnything());
 
-        $this->assertEquals('string', $type->getType());
+        $this->assertEquals('string', $type->getValue());
         $this->assertInstanceOf(IsAnything::class, $type->getMatcher());
     }
 }

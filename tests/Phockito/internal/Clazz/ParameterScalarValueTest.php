@@ -31,12 +31,11 @@ class ParameterScalarValueTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("'lorem isum'", $methodDefaultValue->exportValue());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testNotEmptyValueThrowsException()
+    public function testNotArrayValue()
     {
-        new ParameterScalarValue([1]);
+        $methodDefaultValue = new ParameterScalarValue([1, 2, 3]);
+
+        $this->assertEquals([1, 2, 3], $methodDefaultValue->getValue());
     }
 
     /**

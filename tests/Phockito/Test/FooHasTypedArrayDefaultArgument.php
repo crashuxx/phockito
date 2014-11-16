@@ -3,13 +3,13 @@
 namespace Phockito\Test;
 
 
-class FooHasArrayDefaultArgument
+class FooHasTypedArrayDefaultArgument
 {
     /**
      * @param array $a
      * @return null
      */
-    function Foo($a = [1, 2, 3])
+    function Foo(array $a = [1, 2, 3])
     {
     }
 }

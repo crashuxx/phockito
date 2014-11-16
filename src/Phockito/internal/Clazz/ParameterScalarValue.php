@@ -13,11 +13,7 @@ class ParameterScalarValue implements ParameterDefaultValue
     function __construct($value)
     {
         if (!is_null($value) && !is_scalar($value)) {
-            if (is_array($value)) {
-                if (!empty($value)) {
-                    throw new \InvalidArgumentException('Parameter default value of type array must be empty!');
-                }
-            } else {
+            if (!is_array($value)) {
                 throw new \InvalidArgumentException('Unsupported parameter type "'.gettype($value).'"!');
             }
         }

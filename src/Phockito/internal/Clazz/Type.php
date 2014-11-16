@@ -10,28 +10,28 @@ class Type
     /**
      * @var string
      */
-    private $type;
+    private $value;
     /**
      * @var Matcher
      */
     private $matcher;
 
     /**
-     * @param string $type
+     * @param string $value
      * @param Matcher $matcher
      */
-    function __construct($type, Matcher $matcher)
+    function __construct($value, Matcher $matcher)
     {
-        $this->type = $type;
+        $this->value = $value;
         $this->matcher = $matcher;
     }
 
     /**
      * @return string
      */
-    public function getType()
+    public function getValue()
     {
-        return $this->type;
+        return $this->value;
     }
 
     /**
