@@ -12,7 +12,7 @@ class MethodParameter
      */
     private $name;
     /**
-     * @var null|string
+     * @var Type
      */
     private $type;
     /**
@@ -30,18 +30,16 @@ class MethodParameter
 
     /**
      * @param string $name
-     * @param string|null $type
+     * @param Type $type
      * @param MethodParameterScalarValue|null $defaultValue
-     * @param Matcher $matcher
      * @param bool $asReference
      */
-    function __construct($name, $type, MethodParameterScalarValue $defaultValue = null, Matcher $matcher, $asReference = false)
+    function __construct($name, Type $type, MethodParameterScalarValue $defaultValue = null, $asReference = false)
     {
         $this->name = $name;
         $this->type = $type;
         $this->defaultValue = $defaultValue;
         $this->asReference = $asReference;
-        $this->matcher = $matcher;
     }
 
     /**
@@ -53,7 +51,7 @@ class MethodParameter
     }
 
     /**
-     * @return null|string
+     * @return Type
      */
     public function getType()
     {
@@ -66,14 +64,6 @@ class MethodParameter
     public function getDefaultValue()
     {
         return $this->defaultValue;
-    }
-
-    /**
-     * @return Matcher
-     */
-    public function getMatcher()
-    {
-        return $this->matcher;
     }
 
     /**
