@@ -3,8 +3,6 @@
 namespace Phockito;
 
 
-use Phockito\internal\Context\DummyContext;
-use Phockito\internal\Context\LegacyContext;
 use Phockito\Test\FinalClass;
 use Phockito\Test\HamcrestMe;
 use Phockito\Test\MockMeConstructor;
