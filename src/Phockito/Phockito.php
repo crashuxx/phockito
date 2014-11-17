@@ -701,7 +701,16 @@ class Phockito
     static function reset($mock, $method = null)
     {
         // Get the instance ID. Only resets instance-specific info ATM
-        $instance = $mock->__phockito_instanceid;
+        if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
+            /** @vat \Phockito\internal\Marker\MockMarker $arg */
+            $context = $mock->__phockito_context;
+
+            if ($context instanceof LegacyContext) {
+                $instance = $context->getPhockitoInstanceid();
+            }
+        } else {
+            $instance = $mock->__phockito_instanceid;
+        }
 
         // Remove any stored returns
         if ($method) {
