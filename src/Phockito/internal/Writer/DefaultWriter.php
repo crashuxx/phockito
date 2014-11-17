@@ -29,7 +29,7 @@ class DefaultWriter implements Writer
     private function writeConstructor()
     {
         $this->code[] = 'public $__phockito_context;';
-        $this->code[] = 'public function __construct(\Phockito\internal\Context $context) {';
+        $this->code[] = 'public function __construct(\Phockito\internal\Context\Context $context) {';
         $this->code[] = '    $this->__phockito_context = $context;';
         $this->code[] = '}';
     }

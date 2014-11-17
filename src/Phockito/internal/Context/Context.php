@@ -1,6 +1,6 @@
 <?php
 
-namespace Phockito\internal;
+namespace Phockito\internal\Context;
 
 
 interface Context
