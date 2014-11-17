@@ -1,11 +1,11 @@
 <?php
 
-namespace Phockito\internal;
+namespace Phockito\internal\Writer;
 
 
 use Phockito\internal\Clazz\Method;
 
-class MockWriter
+class DefaultWriter implements Writer
 {
     private $code = [];
 
@@ -14,15 +14,15 @@ class MockWriter
         $this->code[] = 'namespace ' . trim($namespace, " \t\n\r\0\x0B\\") . ';';
     }
 
-    public function writeClassExtend($new, $extend)
+    public function writeClassExtend($new, $extend, $markerInterface)
     {
-        $this->code[] = 'class ' . $new . ' extends ' . $extend . ' implements \Phockito\internal\Marker\MockMarker {';
+        $this->code[] = 'class ' . $new . ' extends ' . $extend . ' implements \\'.$markerInterface.' {';
         $this->writeConstructor();
     }
 
-    public function writeInterfaceExtend($new, $implement)
+    public function writeInterfaceExtend($new, $implement, $markerInterface)
     {
-        $this->code[] = 'class ' . $new . ' implements ' . $implement . ', \Phockito\internal\Marker\MockMarker {';
+        $this->code[] = 'class ' . $new . ' implements ' . $implement . ', \\'.$markerInterface.' {';
         $this->writeConstructor();
     }
 

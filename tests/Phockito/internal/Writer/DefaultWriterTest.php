@@ -1,37 +1,38 @@
 <?php
 
-namespace Phockito\internal;
+namespace Phockito\internal\Writer;
 
 
 use Hamcrest\Core\IsAnything;
 use Phockito\internal\Clazz\Method;
 use Phockito\internal\Clazz\Parameter;
 use Phockito\internal\Clazz\Type;
+use Phockito\internal\Marker\MockMarker;
 
-class MockWriterTest extends \PHPUnit_Framework_TestCase
+class DefaultWriterTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var MockWriter
+     * @var DefaultWriter
      */
     private $writer;
 
     public function testWriteNamespace()
     {
-        $this->writer->writeNamespace('\\Phockito\internal');
+        $this->writer->writeNamespace(__NAMESPACE__);
 
-        $this->assertEquals('namespace Phockito\internal;', $this->writer->build());
+        $this->assertEquals('namespace Phockito\internal\Writer;', $this->writer->build());
     }
 
     public function testWriteClassExtend()
     {
-        $this->writer->writeClassExtend('MockWriterTestExtended', 'MockWriterTest');
+        $this->writer->writeClassExtend('MockWriterTestExtended', 'MockWriterTest', MockMarker::class);
 
         $this->assertStringStartsWith('class MockWriterTestExtended extends MockWriterTest implements \Phockito\internal\Marker\MockMarker', $this->writer->build());
     }
 
     public function testWriteInterfaceExtend()
     {
-        $this->writer->writeInterfaceExtend('MockWriterTestExtended', 'MockWriterTest');
+        $this->writer->writeInterfaceExtend('MockWriterTestExtended', 'MockWriterTest', MockMarker::class);
 
         $this->assertStringStartsWith('class MockWriterTestExtended implements MockWriterTest, \Phockito\internal\Marker\MockMarker', $this->writer->build());
     }
@@ -40,8 +41,8 @@ class MockWriterTest extends \PHPUnit_Framework_TestCase
     {
         $method = new Method('Foo',[new Parameter('a', new Type('array', new IsAnything()), null)], new Type('mixed', new IsAnything()));
 
-        $this->writer->writeNamespace('\\Phockito\internal');
-        $this->writer->writeClassExtend('MockWriterTestExtended', 'MockWriterTest');
+        $this->writer->writeNamespace(__NAMESPACE__);
+        $this->writer->writeClassExtend('MockWriterTestExtended', 'DefaultWriterTest', MockMarker::class);
         $this->writer->writeMethod($method);
         $this->writer->writeClose();
 
@@ -50,6 +51,6 @@ class MockWriterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->writer = new MockWriter();
+        $this->writer = new DefaultWriter();
     }
 }
