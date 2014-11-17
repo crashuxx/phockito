@@ -39,13 +39,42 @@ class DefaultWriterTest extends \PHPUnit_Framework_TestCase
 
     public function testFull()
     {
-        $method = new Method('Foo',[new Parameter('a', new Type('array', new IsAnything()), null)], new Type('mixed', new IsAnything()));
+        $method = new Method('Foo', [new Parameter('a', new Type('array', new IsAnything()), null)], new Type('mixed', new IsAnything()), ['public', 'abstract']);
 
         $this->writer->writeNamespace(__NAMESPACE__);
-        $this->writer->writeClassExtend('MockWriterTestExtended', 'DefaultWriterTest', MockMarker::class);
+        $this->writer->writeClassExtend('MockWriterTestExtendedFull', 'DefaultWriterTest', MockMarker::class);
         $this->writer->writeMethod($method);
         $this->writer->writeClose();
 
+        $this->assertRegExp('/public/', $this->writer->build());
+        $this->assertNotRegExp('/abstract/', $this->writer->build());
+        $this->assertNotRegExp('/&Foo/', $this->writer->build());
+        eval($this->writer->build());
+    }
+
+    public function testAbstractReturnType()
+    {
+        $method = new Method('Foo', [new Parameter('a', new Type('array', new IsAnything()), null)], new Type('mixed', new IsAnything(), true), ['public', 'abstract']);
+
+        $this->writer->writeNamespace(__NAMESPACE__);
+        $this->writer->writeClassExtend('MockWriterTestExtendedAbstractReturnType', 'DefaultWriterTest', MockMarker::class);
+        $this->writer->writeMethod($method);
+        $this->writer->writeClose();
+
+        $this->assertRegExp('/&Foo/', $this->writer->build());
+        eval($this->writer->build());
+    }
+
+    public function testParameterAsReference()
+    {
+        $method = new Method('Foo', [new Parameter('a', new Type('array', new IsAnything(), true), null)], new Type('mixed', new IsAnything()), []);
+
+        $this->writer->writeNamespace(__NAMESPACE__);
+        $this->writer->writeClassExtend('MockWriterTestExtendedParameterAsReference', 'DefaultWriterTest', MockMarker::class);
+        $this->writer->writeMethod($method);
+        $this->writer->writeClose();
+
+        $this->assertRegExp('/&\\$a/', $this->writer->build());
         eval($this->writer->build());
     }
 

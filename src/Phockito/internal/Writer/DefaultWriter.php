@@ -16,13 +16,13 @@ class DefaultWriter implements Writer
 
     public function writeClassExtend($new, $extend, $markerInterface)
     {
-        $this->code[] = 'class ' . $new . ' extends ' . $extend . ' implements \\'.$markerInterface.' {';
+        $this->code[] = 'class ' . $new . ' extends ' . $extend . ' implements \\' . $markerInterface . ' {';
         $this->writeConstructor();
     }
 
     public function writeInterfaceExtend($new, $implement, $markerInterface)
     {
-        $this->code[] = 'class ' . $new . ' implements ' . $implement . ', \\'.$markerInterface.' {';
+        $this->code[] = 'class ' . $new . ' implements ' . $implement . ', \\' . $markerInterface . ' {';
         $this->writeConstructor();
     }
 
@@ -44,7 +44,7 @@ class DefaultWriter implements Writer
                 $arg .= $parameter->getType()->getValue() . ' ';
             }
 
-            if($parameter->getType()->isReference()) {
+            if ($parameter->getType()->isReference()) {
                 $arg .= '&';
             }
 
@@ -57,7 +57,10 @@ class DefaultWriter implements Writer
             $args[] = $arg;
         }
 
-        $this->code[] = 'function ' . $method->getName() . '(' . implode(', ', $args) . ') {';
+        $modifiers = array_diff($method->getModifiers(), ['abstract']);
+
+        $methodName = ($method->getReturnType()->isReference() ? '&' : '') . $method->getName();
+        $this->code[] = implode(' ', $modifiers) . ' function ' . $methodName . '(' . implode(', ', $args) . ') {';
         $this->code[] = '    return $this->context->call(__FUNCTION__, func_get_args());';
         $this->code[] = '}';
     }

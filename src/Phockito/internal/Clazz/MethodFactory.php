@@ -4,6 +4,8 @@ namespace Phockito\internal\Clazz;
 
 
 use Hamcrest\Core\IsAnything;
+use Reflection;
+use ReflectionMethod;
 
 class MethodFactory
 {
@@ -31,6 +33,8 @@ class MethodFactory
             $parameters[] = $this->parameterFactory->createFromReflectionParameter($parameter);
         }
 
-        return new Method($reflectionMethod->getName(), $parameters, new Type('mixed', new IsAnything()));
+        $modifiers = Reflection::getModifierNames($reflectionMethod->getModifiers());
+
+        return new Method($reflectionMethod->getName(), $parameters, new Type('mixed', new IsAnything(), $reflectionMethod->returnsReference()), $modifiers);
     }
 }

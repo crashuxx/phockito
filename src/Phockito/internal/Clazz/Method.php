@@ -17,17 +17,23 @@ class Method
      * @var Type
      */
     private $returnType;
+    /**
+     * @var string[]
+     */
+    private $modifiers;
 
     /**
      * @param string $name
      * @param Parameter[] $parameters
      * @param Type $returnType
+     * @param string[] $modifiers
      */
-    function __construct($name, $parameters, Type $returnType)
+    function __construct($name, $parameters, Type $returnType, $modifiers)
     {
         $this->name = $name;
         $this->parameters = $parameters;
         $this->returnType = $returnType;
+        $this->modifiers = $modifiers;
     }
 
     /**
@@ -52,5 +58,13 @@ class Method
     public function getReturnType()
     {
         return $this->returnType;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getModifiers()
+    {
+        return $this->modifiers;
     }
 }
