@@ -44,6 +44,10 @@ class DefaultWriter implements Writer
                 $arg .= $parameter->getType()->getValue() . ' ';
             }
 
+            if($parameter->isReference()) {
+                $arg .= '&';
+            }
+
             $arg .= '$' . $parameter->getName();
 
             if ($parameter->getDefaultValue() != null) {
