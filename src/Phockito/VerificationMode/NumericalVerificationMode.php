@@ -18,9 +18,8 @@ abstract class NumericalVerificationMode implements VerificationMode
 
     function verify(VerificationContext $verificationContext)
     {
-        $success = $this->_numberOfInvocationsSatisfiesConstraint(
-            count($verificationContext->getMatchingInvocations())
-        );
+        $matchingCount = count($verificationContext->getMatchingInvocations());
+        $success = $this->_numberOfInvocationsSatisfiesConstraint($matchingCount);
 
         if ($success) {
             return new SuccessfulVerificationResult();

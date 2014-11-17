@@ -191,7 +191,7 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
         Phockito::when($mock->Foo())->return(1);
         $this->assertEquals($mock->Foo(), 1);
         $this->assertEquals($mock->Foo(1), 1);
-        $this->assertNull($mock->Foo(2), 1);
+        $this->assertEquals($mock->Foo(2), 1);
     }
 
     function testSpecForOptionalArgumentDoesntAlsoMatchDefault()

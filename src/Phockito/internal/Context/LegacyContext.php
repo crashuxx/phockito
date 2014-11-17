@@ -3,7 +3,11 @@
 namespace Phockito\internal\Context;
 
 
+use Hamcrest\Core\IsAnything;
 use Phockito\internal\Clazz\Clazz;
+use Phockito\internal\Clazz\Method;
+use Phockito\internal\Clazz\Parameter;
+use Phockito\internal\Clazz\Type;
 use Phockito\Phockito;
 
 class LegacyContext implements Context
@@ -40,7 +44,17 @@ class LegacyContext implements Context
      */
     public function call($name, array $args)
     {
-        $method = $this->clazz->getMethod($name);
+        try {
+            $method = $this->clazz->getMethod($name);
+        } catch (\Exception $e) {
+
+            $parameters = [];
+            foreach ($args as $k => $arg) {
+                $parameters[] = new Parameter($k, new Type('mixed', new IsAnything()), null);
+            }
+            $method = new Method($name, $parameters, new Type('mixed', new IsAnything()), []);
+        }
+
         $instance = $method->isStatic() ? ('::' . $this->clazz->getName()) : $this->phockito_instanceid;
 
         $response = Phockito::__called($this->clazz->getName(), $instance, $name, $args);
@@ -78,7 +92,7 @@ class LegacyContext implements Context
     /**
      * @return string
      */
-    public function getPhockitoInstanceid()
+    public function getPhockitoInstanceId()
     {
         return $this->phockito_instanceid;
     }

@@ -134,7 +134,7 @@ class Phockito
         }
 
         // If two argument arrays are different lengths, automatic fail
-        if (count($a) != count($b)) {
+        if (count($a) > count($b)) {
             return false;
         }
 
@@ -614,7 +614,7 @@ class Phockito
             $context = $arg->__phockito_context;
 
             if ($context instanceof LegacyContext) {
-                return new WhenBuilder($context->getPhockitoInstanceid(), $context->getClazz()->getName());
+                return new WhenBuilder($context->getPhockitoInstanceId(), $context->getClazz()->getName());
             }
 
         } else if ($arg instanceof MockMarker) {
@@ -642,7 +642,7 @@ class Phockito
             $context = $mock->__phockito_context;
 
             if ($context instanceof LegacyContext) {
-                return new WhenBuilder($context->getPhockitoInstanceid(), $context->getClazz()->getName());
+                return new VerifyBuilder($context->getPhockitoInstanceId(), $times);
             }
         }
 
@@ -711,7 +711,7 @@ class Phockito
             $context = $mock->__phockito_context;
 
             if ($context instanceof LegacyContext) {
-                $instance = $context->getPhockitoInstanceid();
+                $instance = $context->getPhockitoInstanceId();
             }
         } else {
             $instance = $mock->__phockito_instanceid;
@@ -753,7 +753,7 @@ class Phockito
                 $context = $mock->__phockito_context;
 
                 if ($context instanceof LegacyContext) {
-                    $instance = $context->getPhockitoInstanceid();
+                    $instance = $context->getPhockitoInstanceId();
                 }
             } else {
                 $instance = $mock->__phockito_instanceid;
