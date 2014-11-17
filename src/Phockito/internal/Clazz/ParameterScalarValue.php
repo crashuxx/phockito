@@ -14,7 +14,7 @@ class ParameterScalarValue implements ParameterDefaultValue
     {
         if (!is_null($value) && !is_scalar($value)) {
             if (!is_array($value)) {
-                throw new \InvalidArgumentException('Unsupported parameter type "'.gettype($value).'"!');
+                throw new \InvalidArgumentException('Unsupported parameter type "' . gettype($value) . '"!');
             }
         }
 

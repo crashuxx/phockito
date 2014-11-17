@@ -3,7 +3,7 @@
 namespace Phockito\internal\Clazz;
 
 
-class Method 
+class Method
 {
     /**
      * @var string

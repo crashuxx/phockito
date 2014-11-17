@@ -3,7 +3,7 @@
 namespace Phockito\internal;
 
 
-interface Context 
+interface Context
 {
     /**
      * @param string $name

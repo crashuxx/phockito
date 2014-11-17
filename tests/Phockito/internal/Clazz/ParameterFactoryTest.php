@@ -37,7 +37,7 @@ class ParameterFactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('a', $parameter->getName());
         $this->assertEquals('mixed', $parameter->getType()->getValue());
-        $this->assertEquals([1,2,3], $parameter->getDefaultValue()->getValue());
+        $this->assertEquals([1, 2, 3], $parameter->getDefaultValue()->getValue());
         MatcherAssert::assertThat($parameter->getDefaultValue()->getValue(), $parameter->getType()->getMatcher());
     }
 
@@ -52,7 +52,7 @@ class ParameterFactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('a', $parameter->getName());
         $this->assertEquals('array', $parameter->getType()->getValue());
-        $this->assertEquals([1,2,3], $parameter->getDefaultValue()->getValue());
+        $this->assertEquals([1, 2, 3], $parameter->getDefaultValue()->getValue());
         MatcherAssert::assertThat($parameter->getDefaultValue()->getValue(), $parameter->getType()->getMatcher());
     }
 

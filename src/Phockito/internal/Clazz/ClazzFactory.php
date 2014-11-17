@@ -3,7 +3,7 @@
 namespace Phockito\internal\Clazz;
 
 
-class ClazzFactory 
+class ClazzFactory
 {
     /**
      * @var MethodFactory

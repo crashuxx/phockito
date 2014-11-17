@@ -3,7 +3,7 @@
 namespace Phockito\internal\Clazz;
 
 
-class Clazz 
+class Clazz
 {
     const T_CLASS = 'class';
     const T_INTERFACE = 'interface';
