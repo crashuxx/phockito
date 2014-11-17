@@ -15,15 +15,21 @@ class Type
      * @var Matcher
      */
     private $matcher;
+    /**
+     * @var bool
+     */
+    private $reference;
 
     /**
      * @param string $value
      * @param Matcher $matcher
+     * @param bool $reference
      */
-    function __construct($value, Matcher $matcher)
+    function __construct($value, Matcher $matcher, $reference = false)
     {
         $this->value = $value;
         $this->matcher = $matcher;
+        $this->reference = $reference;
     }
 
     /**
@@ -40,5 +46,13 @@ class Type
     public function getMatcher()
     {
         return $this->matcher;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isReference()
+    {
+        return $this->reference;
     }
 }

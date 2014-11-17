@@ -15,7 +15,6 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('test', $methodParameter->getName());
         $this->assertEquals($type, $methodParameter->getType());
         $this->assertEquals(null, $methodParameter->getDefaultValue());
-        $this->assertFalse($methodParameter->isReference());
     }
 }
  

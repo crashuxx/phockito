@@ -16,12 +16,12 @@ class ParameterFactory
     public function createFromReflectionParameter(\ReflectionParameter $reflectionParameter)
     {
         if ($reflectionParameter->isArray()) {
-            $type = new Type('array', new IsArray());
+            $type = new Type('array', new IsArray(), $reflectionParameter->isPassedByReference());
         } else if ($reflectionParameter->getClass() !== null) {
             $className = '\\' . $reflectionParameter->getClass()->getName();
-            $type = new Type($className, new IsInstanceOf($className));
+            $type = new Type($className, new IsInstanceOf($className), $reflectionParameter->isPassedByReference());
         } else {
-            $type = new Type('mixed', new IsAnything());
+            $type = new Type('mixed', new IsAnything(), $reflectionParameter->isPassedByReference());
         }
 
         $defaultValue = null;

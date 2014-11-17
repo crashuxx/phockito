@@ -20,10 +20,6 @@ class Parameter
      */
     private $defaultValue;
     /**
-     * @var bool
-     */
-    private $asReference;
-    /**
      * @var Matcher
      */
     private $matcher;
@@ -32,14 +28,12 @@ class Parameter
      * @param string $name
      * @param Type $type
      * @param ParameterScalarValue|null $defaultValue
-     * @param bool $asReference
      */
-    function __construct($name, Type $type, ParameterScalarValue $defaultValue = null, $asReference = false)
+    function __construct($name, Type $type, ParameterScalarValue $defaultValue = null)
     {
         $this->name = $name;
         $this->type = $type;
         $this->defaultValue = $defaultValue;
-        $this->asReference = $asReference;
     }
 
     /**
@@ -64,13 +58,5 @@ class Parameter
     public function getDefaultValue()
     {
         return $this->defaultValue;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isReference()
-    {
-        return $this->asReference;
     }
 }
