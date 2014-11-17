@@ -743,7 +743,18 @@ class Phockito
 
         /** @var MockMarker $mock */
         foreach ($mocks as $mock) {
-            $verificationContext = new VerificationContext($mock->__phockito_instanceid, null, array());
+            if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
+                /** @vat \Phockito\internal\Marker\MockMarker $arg */
+                $context = $mock->__phockito_context;
+
+                if ($context instanceof LegacyContext) {
+                    $instance = $context->getPhockitoInstanceid();
+                }
+            } else {
+                $instance = $mock->__phockito_instanceid;
+            }
+
+            $verificationContext = new VerificationContext($instance, null, array());
             $verificationResult = $noMoreInteractionsVerificationMode->verify($verificationContext);
             if ($verificationResult instanceof UnsuccessfulVerificationResult) {
                 (new UnsuccessfulVerificationReporter())->reportUnsuccessfulVerification($verificationResult);
