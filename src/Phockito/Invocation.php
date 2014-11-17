@@ -93,7 +93,7 @@ class Invocation
             } elseif (isset($invocationArg->__phockito_matcher)) {
                 $matcher = $invocationArg->__phockito_matcher;
             }
-            return $matcher != null && $matcher->matches($passedArg);
+            return $matcher != null && $matcher->matches($invocationArg);
         } // Otherwise check for equality by checking the equality of the serialized version
         else {
             return serialize($invocationArg) == serialize($passedArg);
