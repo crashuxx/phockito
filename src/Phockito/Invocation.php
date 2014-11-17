@@ -84,19 +84,19 @@ class Invocation
         // If the argument in $invocationArg is a hamcrest matcher, call match on it.
         // WONTFIX: Can't check if function was passed a hamcrest matcher
         if (interface_exists(Matcher::class) &&
-            ($invocationArg instanceof Matcher || isset($invocationArg->__phockito_matcher))
+            ($passedArg instanceof Matcher || isset($invocationArg->__phockito_matcher))
         ) {
             // The matcher can either be passed directly, or wrapped in a mock (for type safety reasons)
             $matcher = null;
-            if ($invocationArg instanceof Matcher) {
-                $matcher = $invocationArg;
+            if ($passedArg instanceof Matcher) {
+                $matcher = $passedArg;
             } elseif (isset($invocationArg->__phockito_matcher)) {
                 $matcher = $invocationArg->__phockito_matcher;
             }
-            return $matcher != null && !$matcher->matches($passedArg);
+            return $matcher != null && $matcher->matches($passedArg);
         } // Otherwise check for equality by checking the equality of the serialized version
         else {
-            return serialize($invocationArg) != serialize($passedArg);
+            return serialize($invocationArg) == serialize($passedArg);
         }
     }
 }
