@@ -11,8 +11,8 @@ class ClazzFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $reflectionClass = new \ReflectionClass(FooHasIntegerDefaultArgument::class);
 
-        $methodFactory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
-        $clazz = $methodFactory->createFromReflectionClass($reflectionClass);
+        $factory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
+        $clazz = $factory->createFromReflectionClass($reflectionClass);
 
         $this->assertEquals(FooHasIntegerDefaultArgument::class, $clazz->getName());
         $this->assertEquals(Clazz::T_CLASS, $clazz->getType());

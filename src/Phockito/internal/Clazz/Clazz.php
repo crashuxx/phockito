@@ -55,4 +55,27 @@ class Clazz
     {
         return $this->methods;
     }
+
+    /**
+     * @param string $name
+     * @return Method
+     */
+    public function getMethod($name)
+    {
+        foreach ($this->methods as $method) {
+            if (!strcasecmp($name, $method->getName())) {
+                return $method;
+            }
+        }
+
+        throw new \RuntimeException('Missing definition for method :' . $name);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInterface()
+    {
+        return $this->type == Clazz::T_INTERFACE;
+    }
 }

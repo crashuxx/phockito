@@ -67,4 +67,17 @@ class Method
     {
         return $this->modifiers;
     }
+
+    /**
+     * @return bool
+     */
+    public function isStatic()
+    {
+        return in_array('static', $this->modifiers);
+    }
+
+    public function isAbstract()
+    {
+        return in_array('abstract', $this->modifiers);
+    }
 }

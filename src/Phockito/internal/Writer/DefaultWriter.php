@@ -61,7 +61,8 @@ class DefaultWriter implements Writer
 
         $methodName = ($method->getReturnType()->isReference() ? '&' : '') . $method->getName();
         $this->code[] = implode(' ', $modifiers) . ' function ' . $methodName . '(' . implode(', ', $args) . ') {';
-        $this->code[] = '    return $this->context->call(__FUNCTION__, func_get_args());';
+        $this->code[] = '    $result = $this->context->call(__FUNCTION__, func_get_args());';
+        $this->code[] = '    return $result->invokeParent() ? parent::' . $method->getName() . '() : $result->getValue();';
         $this->code[] = '}';
     }
 
