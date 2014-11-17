@@ -10,7 +10,6 @@ class MockMeConstructor
     /**
      * @param PassMe $passMe
      * @throws Exception
-     * @return null
      */
     function __construct(PassMe $passMe)
     {

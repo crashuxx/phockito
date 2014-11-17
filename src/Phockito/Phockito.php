@@ -4,6 +4,11 @@ namespace Phockito;
 
 
 use Hamcrest\Matcher;
+use Phockito\internal\Clazz\ClazzFactory;
+use Phockito\internal\Clazz\MethodFactory;
+use Phockito\internal\Clazz\ParameterFactory;
+use Phockito\internal\Context\LegacyContext;
+use Phockito\internal\Writer\DefaultWriter;
 use Phockito\VerificationMode\AtLeast;
 use Phockito\VerificationMode\AtMost;
 use Phockito\VerificationMode\NoMoreInteractions;
@@ -253,212 +258,245 @@ class Phockito
             user_error("Can't mock final class $mockedClass", E_USER_ERROR);
         }
 
-        // Build up an array of php fragments that make the mocking class definition
-        $php = array();
+        $classFactory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
 
-        // Get the namespace & the shortname of the mocked class
-        if (self::_has_namespaces()) {
-            $mockedNamespace = $reflect->getNamespaceName();
-            $mockedShortName = $reflect->getShortName();
+        $clazz = $classFactory->createFromReflectionClass($reflect);
+
+        $writer = new DefaultWriter();
+
+        $mockerClass = $reflect->getShortName() . md5(rand(0, 100000));
+
+        $rootNamespace = $reflect->getNamespaceName() ? '' : '\\';
+        if ($reflect->getNamespaceName()) {
+            $writer->writeNamespace($reflect->getNamespaceName());
+        }
+
+        if ($clazz->isInterface()) {
+            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), MockMarker::class . ', \Phockito\internal\Marker\MockMarker');
         } else {
-            $mockedNamespace = '';
-            $mockedShortName = $mockedClass;
+            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), MockMarker::class . ', \Phockito\internal\Marker\MockMarker');
         }
 
-        // Build the short name of the mocker class based on the mocked classes shortname
-        $mockerShortName = self::MOCK_PREFIX . $mockedShortName . ($partial ? '_Spy' : '_Mock');
-        // And build the full class name of the mocker by prepending the namespace if appropriate
-        $mockerClass = (self::_has_namespaces() ? $mockedNamespace . '\\' : '') . $mockerShortName;
-
-        // If we've already built this test double, just return it
-        if (class_exists($mockerClass, false)) {
-            return $mockerClass;
-        }
-
-        // If the mocked class is in a namespace, the test double goes in the same namespace
-        $namespaceDeclaration = $mockedNamespace ? "namespace $mockedNamespace;" : '';
-
-        // The only difference between mocking a class or an interface is how the mocking class extends from the mocked
-        $extends = $reflect->isInterface() ? 'implements' : 'extends';
-        $marker = $reflect->isInterface() ? ', \Phockito\MockMarker' : 'implements \Phockito\MockMarker';
-
-        // When injecting the class as a string, need to escape the "\" character.
-        $mockedClassString = "'\\\\" . str_replace('\\', '\\\\', $mockedClass) . "'";
-        $mockedClassClass = '\\' . $mockedClass . '::class';
-
-        // Add opening class stanza
-        $php[] = <<<EOT
-$namespaceDeclaration
-class $mockerShortName $extends $mockedShortName $marker {
-  public \$__phockito_instanceid;
-  public \$__phockito_class = $mockedClassClass;
-
-  function __construct() {
-    \$this->__phockito_instanceid = $mockedClassString.':'.(++\\Phockito\\Phockito::\$_instanceid_counter);
-  }
-EOT;
-
-        // And record the defaults at the same time
-        self::$_defaults[$mockedClass] = array();
-        // And whether it's an interface
-        self::$_is_interface[$mockedClass] = $reflect->isInterface();
-
-        // Track if the mocked class defines either of the __call and/or __toString magic methods
-        $has__call = $has__toString = false;
-
-        // Step through every method declared on the object
-        foreach ($reflect->getMethods() as $method) {
-            // Skip private methods. They shouldn't ever be called anyway
-            if ($method->isPrivate()) {
-                continue;
+        foreach ($clazz->getMethods() as $method) {
+            if (strcasecmp('__construct', $method->getName())) {
+                $writer->writeMethod($method);
             }
+        }
+        $writer->writeClose();
 
-            // Either skip or throw error on final methods.
-            if ($method->isFinal()) {
-                if (self::$ignore_finals) {
-                    continue;
+        eval($writer->build());
+
+        $context = new LegacyContext($clazz, $partial);
+
+        $fullMockClass = trim('\\' . $reflect->getNamespaceName() . '\\' . $mockerClass, '\\');
+        return new $fullMockClass($context);
+        /*
+                // Build up an array of php fragments that make the mocking class definition
+                $php = array();
+
+                // Get the namespace & the shortname of the mocked class
+                if (self::_has_namespaces()) {
+                    $mockedNamespace = $reflect->getNamespaceName();
+                    $mockedShortName = $reflect->getShortName();
                 } else {
-                    user_error(
-                        "Class $mockedClass has final method {$method->name}, which we can\'t mock",
-                        E_USER_WARNING
-                    );
+                    $mockedNamespace = '';
+                    $mockedShortName = $mockedClass;
                 }
-            }
 
-            // Get the modifiers for the function as a string (static, public, etc) - ignore abstract though, all mock methods are concrete
-            $modifiers = implode(
-                ' ',
-                Reflection::getModifierNames($method->getModifiers() & ~(ReflectionMethod::IS_ABSTRACT))
-            );
+                // Build the short name of the mocker class based on the mocked classes shortname
+                $mockerShortName = self::MOCK_PREFIX . $mockedShortName . ($partial ? '_Spy' : '_Mock');
+                // And build the full class name of the mocker by prepending the namespace if appropriate
+                $mockerClass = (self::_has_namespaces() ? $mockedNamespace . '\\' : '') . $mockerShortName;
 
-            // See if the method is return byRef
-            $byRef = $method->returnsReference() ? "&" : "";
+                // If we've already built this test double, just return it
+                if (class_exists($mockerClass, false)) {
+                    return $mockerClass;
+                }
 
-            // PHP fragment that is the arguments definition for this method
-            $defparams = array();
-            $callparams = array();
+                // If the mocked class is in a namespace, the test double goes in the same namespace
+                $namespaceDeclaration = $mockedNamespace ? "namespace $mockedNamespace;" : '';
 
-            // Array of defaults (sparse numeric)
-            self::$_defaults[$mockedClass][$method->name] = array();
+                // The only difference between mocking a class or an interface is how the mocking class extends from the mocked
+                $extends = $reflect->isInterface() ? 'implements' : 'extends';
+                $marker = $reflect->isInterface() ? ', \Phockito\MockMarker' : 'implements \Phockito\MockMarker';
 
-            foreach ($method->getParameters() as $i => $parameter) {
-                // Turn the method arguments into a php fragment that calls a function with them
-                $callparams[] = '$' . $parameter->getName();
+                // When injecting the class as a string, need to escape the "\" character.
+                $mockedClassString = "'\\\\" . str_replace('\\', '\\\\', $mockedClass) . "'";
+                $mockedClassClass = '\\' . $mockedClass . '::class';
 
-                // Get the type hint of the parameter
-                if ($parameter->isArray()) {
-                    $type = 'array ';
-                } else {
-                    if ($parameterClass = $parameter->getClass()) {
-                        $type = '\\' . $parameterClass->getName() . ' ';
+                // Add opening class stanza
+                $php[] = <<<EOT
+        $namespaceDeclaration
+        class $mockerShortName $extends $mockedShortName $marker {
+          public \$__phockito_instanceid;
+          public \$__phockito_class = $mockedClassClass;
+
+          function __construct() {
+            \$this->__phockito_instanceid = $mockedClassString.':'.(++\\Phockito\\Phockito::\$_instanceid_counter);
+          }
+        EOT;
+
+                // And record the defaults at the same time
+                self::$_defaults[$mockedClass] = array();
+                // And whether it's an interface
+                self::$_is_interface[$mockedClass] = $reflect->isInterface();
+
+                // Track if the mocked class defines either of the __call and/or __toString magic methods
+                $has__call = $has__toString = false;
+
+                // Step through every method declared on the object
+                foreach ($reflect->getMethods() as $method) {
+                    // Skip private methods. They shouldn't ever be called anyway
+                    if ($method->isPrivate()) {
+                        continue;
+                    }
+
+                    // Either skip or throw error on final methods.
+                    if ($method->isFinal()) {
+                        if (self::$ignore_finals) {
+                            continue;
+                        } else {
+                            user_error(
+                                "Class $mockedClass has final method {$method->name}, which we can\'t mock",
+                                E_USER_WARNING
+                            );
+                        }
+                    }
+
+                    // Get the modifiers for the function as a string (static, public, etc) - ignore abstract though, all mock methods are concrete
+                    $modifiers = implode(
+                        ' ',
+                        Reflection::getModifierNames($method->getModifiers() & ~(ReflectionMethod::IS_ABSTRACT))
+                    );
+
+                    // See if the method is return byRef
+                    $byRef = $method->returnsReference() ? "&" : "";
+
+                    // PHP fragment that is the arguments definition for this method
+                    $defparams = array();
+                    $callparams = array();
+
+                    // Array of defaults (sparse numeric)
+                    self::$_defaults[$mockedClass][$method->name] = array();
+
+                    foreach ($method->getParameters() as $i => $parameter) {
+                        // Turn the method arguments into a php fragment that calls a function with them
+                        $callparams[] = '$' . $parameter->getName();
+
+                        // Get the type hint of the parameter
+                        if ($parameter->isArray()) {
+                            $type = 'array ';
+                        } else {
+                            if ($parameterClass = $parameter->getClass()) {
+                                $type = '\\' . $parameterClass->getName() . ' ';
+                            } else {
+                                $type = '';
+                            }
+                        }
+
+                        try {
+                            $defaultValue = $parameter->getDefaultValue();
+                        } catch (ReflectionException $e) {
+                            $defaultValue = null;
+                        }
+
+                        // Turn the method arguments into a php fragment the defines a function with them, including possibly the by-reference "&" and any default
+                        $defparams[] =
+                            $type .
+                            ($parameter->isPassedByReference() ? '&' : '') .
+                            '$' . $parameter->getName() .
+                            ($parameter->isOptional() ? '=' . var_export($defaultValue, true) : '');
+
+                        // Finally cache the default value for matching against later
+                        if ($parameter->isOptional()) {
+                            self::$_defaults[$mockedClass][$method->name][$i] = $defaultValue;
+                        }
+                    }
+
+                    // Turn that array into a comma seperated list
+                    $defparams = implode(', ', $defparams);
+                    $callparams = implode(', ', $callparams);
+
+                    // What to do if there's no stubbed response
+                    if ($partial && !$method->isAbstract()) {
+                        $failover = "call_user_func_array(array($mockedClassString, '{$method->name}'), \$args)";
                     } else {
-                        $type = '';
+                        $failover = "null";
+                    }
+
+                    // Constructor is handled specially. For spies, we do call the parent's constructor. For mocks we ignore
+                    if ($method->name == '__construct') {
+                        if ($partial) {
+                            $php[] = <<<EOT
+          function __phockito_parent_construct( $defparams ){
+            parent::__construct( $callparams );
+          }
+        EOT;
+                        }
+                    } elseif ($method->name == '__call') {
+                        $has__call = true;
+                    } elseif ($method->name == '__toString') {
+                        $has__toString = true;
+                    } // Build an overriding method that calls Phockito::__called, and never calls the parent
+                    else {
+                        $php[] = <<<EOT
+          $modifiers function $byRef {$method->name}( $defparams ){
+            \$args = func_get_args();
+
+            \$backtrace = debug_backtrace();
+
+            \$instance = \$backtrace[0]['type'] == '::' ? ('::'.$mockedClassClass) : \$this->__phockito_instanceid;
+
+            \$response = \\Phockito\\Phockito::__called($mockedClassClass, \$instance, '{$method->name}', \$args);
+
+            \$result = \$response ? \\Phockito\\Phockito::__perform_response(\$response, \$args) : ($failover);
+
+            return \$result;
+          }
+        EOT;
                     }
                 }
 
-                try {
-                    $defaultValue = $parameter->getDefaultValue();
-                } catch (ReflectionException $e) {
-                    $defaultValue = null;
-                }
+                // Always add a __call method to catch any calls to undefined functions
+                $failover = ($partial && $has__call) ? "parent::__call(\$name, \$args)" : "null";
 
-                // Turn the method arguments into a php fragment the defines a function with them, including possibly the by-reference "&" and any default
-                $defparams[] =
-                    $type .
-                    ($parameter->isPassedByReference() ? '&' : '') .
-                    '$' . $parameter->getName() .
-                    ($parameter->isOptional() ? '=' . var_export($defaultValue, true) : '');
-
-                // Finally cache the default value for matching against later
-                if ($parameter->isOptional()) {
-                    self::$_defaults[$mockedClass][$method->name][$i] = $defaultValue;
-                }
-            }
-
-            // Turn that array into a comma seperated list
-            $defparams = implode(', ', $defparams);
-            $callparams = implode(', ', $callparams);
-
-            // What to do if there's no stubbed response
-            if ($partial && !$method->isAbstract()) {
-                $failover = "call_user_func_array(array($mockedClassString, '{$method->name}'), \$args)";
-            } else {
-                $failover = "null";
-            }
-
-            // Constructor is handled specially. For spies, we do call the parent's constructor. For mocks we ignore
-            if ($method->name == '__construct') {
-                if ($partial) {
-                    $php[] = <<<EOT
-  function __phockito_parent_construct( $defparams ){
-    parent::__construct( $callparams );
-  }
-EOT;
-                }
-            } elseif ($method->name == '__call') {
-                $has__call = true;
-            } elseif ($method->name == '__toString') {
-                $has__toString = true;
-            } // Build an overriding method that calls Phockito::__called, and never calls the parent
-            else {
                 $php[] = <<<EOT
-  $modifiers function $byRef {$method->name}( $defparams ){
-    \$args = func_get_args();
+          function __call(\$name, \$args) {
+            \$response = \\Phockito\\Phockito::__called($mockedClassString, \$this->__phockito_instanceid, \$name, \$args);
 
-    \$backtrace = debug_backtrace();
+            if (\$response) return \\Phockito\\Phockito::__perform_response(\$response, \$args);
+            else return $failover;
+          }
+        EOT;
 
-    \$instance = \$backtrace[0]['type'] == '::' ? ('::'.$mockedClassClass) : \$this->__phockito_instanceid;
+                // Always add a __toString method
+                if ($partial) {
+                    if ($has__toString) {
+                        $failover = "parent::__toString()";
+                    } else {
+                        $failover = "user_error('Object of class '.$mockedClassString.' could not be converted to string', E_USER_ERROR)";
+                    }
+                } else {
+                    $failover = "''";
+                }
 
-    \$response = \\Phockito\\Phockito::__called($mockedClassClass, \$instance, '{$method->name}', \$args);
+                $php[] = <<<EOT
+          function __toString() {
+            \$args = array();
+            \$response = \\Phockito\\Phockito::__called($mockedClassString, \$this->__phockito_instanceid, "__toString", \$args);
 
-    \$result = \$response ? \\Phockito\\Phockito::__perform_response(\$response, \$args) : ($failover);
+            if (\$response) return \\Phockito\\Phockito::__perform_response(\$response, \$args);
+            else return $failover;
+          }
+        EOT;
 
-    return \$result;
-  }
-EOT;
-            }
-        }
+                // Close off the class definition and eval it to create the class as an extant entity.
+                $php[] = '}';
 
-        // Always add a __call method to catch any calls to undefined functions
-        $failover = ($partial && $has__call) ? "parent::__call(\$name, \$args)" : "null";
-
-        $php[] = <<<EOT
-  function __call(\$name, \$args) {
-    \$response = \\Phockito\\Phockito::__called($mockedClassString, \$this->__phockito_instanceid, \$name, \$args);
-
-    if (\$response) return \\Phockito\\Phockito::__perform_response(\$response, \$args);
-    else return $failover;
-  }
-EOT;
-
-        // Always add a __toString method
-        if ($partial) {
-            if ($has__toString) {
-                $failover = "parent::__toString()";
-            } else {
-                $failover = "user_error('Object of class '.$mockedClassString.' could not be converted to string', E_USER_ERROR)";
-            }
-        } else {
-            $failover = "''";
-        }
-
-        $php[] = <<<EOT
-  function __toString() {
-    \$args = array();
-    \$response = \\Phockito\\Phockito::__called($mockedClassString, \$this->__phockito_instanceid, "__toString", \$args);
-
-    if (\$response) return \\Phockito\\Phockito::__perform_response(\$response, \$args);
-    else return $failover;
-  }
-EOT;
-
-        // Close off the class definition and eval it to create the class as an extant entity.
-        $php[] = '}';
-
-        // Debug: uncomment to spit out the code we're about to compile to stdout
-        // echo "\n" . implode("\n\n", $php) . "\n";
-        eval(implode("\n\n", $php));
-        return $mockerClass;
+                // Debug: uncomment to spit out the code we're about to compile to stdout
+                // echo "\n" . implode("\n\n", $php) . "\n";
+                eval(implode("\n\n", $php));
+                return $mockerClass;*/
     }
 
     /**
@@ -503,7 +541,8 @@ EOT;
      */
     static function mock($class)
     {
-        return self::mock_instance($class);
+        return self::build_test_double(false, $class);
+        //return self::mock_instance($class);
     }
 
     static function spy_class($class)
