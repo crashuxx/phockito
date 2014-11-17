@@ -62,4 +62,28 @@ class LegacyContext implements Context
     {
         return $this->partial && !$this->clazz->isInterface() && !$this->clazz->getMethod($name)->isAbstract();
     }
+
+    /**
+     * @return Clazz
+     */
+    public function getClazz()
+    {
+        return $this->clazz;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPhockitoInstanceid()
+    {
+        return $this->phockito_instanceid;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isPartial()
+    {
+        return $this->partial;
+    }
 }

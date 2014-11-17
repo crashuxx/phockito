@@ -604,14 +604,21 @@ class Phockito
      */
     static function when($arg = null)
     {
-        if ($arg instanceof MockMarker) {
-            return new WhenBuilder($arg->__phockito_instanceid, $arg->__phockito_class);
-        } else {
+        if ($arg instanceof \Phockito\internal\Marker\MockMarker) {
+            /** @vat \Phockito\internal\Marker\MockMarker $arg */
+            $context = $arg->__phockito_context;
 
-            /** @var Invocation $invocation */
-            $invocation = array_shift(self::$_invocation_list);
-            return new WhenBuilder($invocation->instanceId, $invocation->className, $invocation->methodName, $invocation->args);
+            if ($context instanceof LegacyContext) {
+                return new WhenBuilder($context->getPhockitoInstanceid(), $context->getClazz()->getName());
+            }
+
+        } else if ($arg instanceof MockMarker) {
+            return new WhenBuilder($arg->__phockito_instanceid, $arg->__phockito_class);
         }
+
+        /** @var Invocation $invocation */
+        $invocation = array_shift(self::$_invocation_list);
+        return new WhenBuilder($invocation->instanceId, $invocation->className, $invocation->methodName, $invocation->args);
     }
 
     /**
@@ -625,6 +632,15 @@ class Phockito
      */
     static function verify($mock, $times = 1)
     {
+        if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
+            /** @vat \Phockito\internal\Marker\MockMarker $arg */
+            $context = $mock->__phockito_context;
+
+            if ($context instanceof LegacyContext) {
+                return new WhenBuilder($context->getPhockitoInstanceid(), $context->getClazz()->getName());
+            }
+        }
+
         return new VerifyBuilder($mock->__phockito_instanceid, $times);
     }
 
