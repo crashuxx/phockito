@@ -278,10 +278,15 @@ class Phockito
         }
 
         foreach ($clazz->getMethods() as $method) {
-            if (strcasecmp('__construct', $method->getName())) {
+            if (!strcasecmp('__construct', $method->getName())) {
+            } else if (!strcasecmp('__call', $method->getName())) {
+            } else {
                 $writer->writeMethod($method);
             }
+
         }
+
+        $writer->writeCallMethod();
         $writer->writeClose();
 
         eval($writer->build());

@@ -48,7 +48,11 @@ class LegacyContext implements Context
         if ($response) {
             $returnValue = new ReturnValue(false, Phockito::__perform_response($response, $args));
         } else {
-            $returnValue = new ReturnValue($this->invokeParentMethod($name), null);
+            if ($name == '__toString') {
+                $returnValue = new ReturnValue($this->invokeParentMethod($name), '');
+            } else {
+                $returnValue = new ReturnValue($this->invokeParentMethod($name), null);
+            }
         }
 
         return $returnValue;

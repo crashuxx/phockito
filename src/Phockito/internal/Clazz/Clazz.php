@@ -68,7 +68,7 @@ class Clazz
             }
         }
 
-        throw new \RuntimeException('Missing definition for method :' . $name);
+        throw new \RuntimeException('Missing definition for method : ' . $name);
     }
 
     /**

@@ -67,6 +67,15 @@ class DefaultWriter implements Writer
         $this->code[] = '}';
     }
 
+    public function writeCallMethod()
+    {
+        $this->code[] = '   public function __call($name, $args) {';
+        $this->code[] = '    $result = $this->__phockito_context->call($name, $args);';
+        $this->code[] = '    $return = $result->invokeParent() ? parent::__call($name, $args) : $result->getValue();';
+        $this->code[] = '    return $return;';
+        $this->code[] = '}';
+    }
+
     public function writeClose()
     {
         $this->code[] = '}';
