@@ -8,6 +8,9 @@ use Phockito\internal\Clazz\ClazzFactory;
 use Phockito\internal\Clazz\MethodFactory;
 use Phockito\internal\Clazz\ParameterFactory;
 use Phockito\internal\Context\LegacyContext;
+use Phockito\internal\Context\LegacyMockContext;
+use Phockito\internal\Context\LegacySpyContext;
+use Phockito\internal\EnhancedClazz;
 use Phockito\internal\Writer\DefaultWriter;
 use Phockito\VerificationMode\AtLeast;
 use Phockito\VerificationMode\AtMost;
@@ -239,7 +242,7 @@ class Phockito
      * @static
      * @param bool $partial - Should test double be a partial or a full mock
      * @param string $mockedClass - The name of the class (or interface) to create a mock of
-     * @return string The name of the mocker class
+     * @return EnhancedClazz The name of the mocker class
      */
     protected static function build_test_double($partial, $mockedClass)
     {
@@ -279,22 +282,24 @@ class Phockito
 
         foreach ($clazz->getMethods() as $method) {
             if (!strcasecmp('__construct', $method->getName())) {
+            } else if (!strcasecmp('__toString', $method->getName())) {
             } else if (!strcasecmp('__call', $method->getName())) {
             } else {
                 $writer->writeMethod($method);
             }
-
         }
 
+        $writer->writeToStringMethod();
         $writer->writeCallMethod();
         $writer->writeClose();
 
         eval($writer->build());
 
-        $context = new LegacyContext($clazz, $partial);
+        //$context = new LegacyContext($clazz, $partial);
 
         $fullMockClass = trim('\\' . $reflect->getNamespaceName() . '\\' . $mockerClass, '\\');
-        return new $fullMockClass($context);
+        return new EnhancedClazz($fullMockClass, $clazz);
+        //return new $fullMockClass($context);
         /*
                 // Build up an array of php fragments that make the mocking class definition
                 $php = array();
@@ -546,7 +551,8 @@ class Phockito
      */
     static function mock($class)
     {
-        return self::build_test_double(false, $class);
+        $enhancedClazz = self::build_test_double(false, $class);
+        return $enhancedClazz->newInstance(new LegacyMockContext($enhancedClazz->getClazz()));
         //return self::mock_instance($class);
     }
 
@@ -594,10 +600,12 @@ class Phockito
         return $res;
     }
 
-    static function spy()
+    static function spy($object)
     {
-        $args = func_get_args();
-        return call_user_func_array(array(__CLASS__, 'spy_instance'), $args);
+        $enhancedClazz = self::build_test_double(false, get_class($object));
+        return $enhancedClazz->newInstance(new LegacySpyContext($enhancedClazz->getClazz(), $object));
+        /*$args = func_get_args();
+        return call_user_func_array(array(__CLASS__, 'spy_instance'), $args);/**/
     }
 
     /**
@@ -710,7 +718,7 @@ class Phockito
             /** @vat \Phockito\internal\Marker\MockMarker $arg */
             $context = $mock->__phockito_context;
 
-            if ($context instanceof LegacyContext) {
+            if ($context instanceof LegacyMockContext) {
                 $instance = $context->getPhockitoInstanceId();
             }
         } else {
@@ -752,7 +760,7 @@ class Phockito
                 /** @vat \Phockito\internal\Marker\MockMarker $arg */
                 $context = $mock->__phockito_context;
 
-                if ($context instanceof LegacyContext) {
+                if ($context instanceof LegacyMockContext) {
                     $instance = $context->getPhockitoInstanceId();
                 }
             } else {

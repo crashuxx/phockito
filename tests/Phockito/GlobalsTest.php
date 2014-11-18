@@ -3,6 +3,7 @@
 namespace Phockito;
 
 use Phockito\Test\MockMe;
+use Phockito\Test\SpyMe;
 use PHPUnit_Framework_TestCase;
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/src/globals.php');
@@ -17,15 +18,22 @@ class GlobalsTest extends PHPUnit_Framework_TestCase
         $this->assertNull($mock->Bar());
     }
 
+    function testCanBuildSpy()
+    {
+        $spy = spy(new SpyMe());
+
+        $this->assertInstanceOf(SpyMe::class, $spy);
+        $this->assertEquals('Foo', $spy->Baz('Foo'));
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage Base method Foo was called
      */
-    function testCanBuildSpy()
+    function testSpyMethodThrowsException()
     {
-        $spy = spy(MockMe::class);
-        $this->assertInstanceOf(MockMe::class, $spy);
-        $this->assertEquals($spy->Foo(), 'Foo');
+        $spy = spy(new SpyMe());
+        $spy->Foo();
     }
 
     function testCanStub()

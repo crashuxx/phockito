@@ -8,7 +8,7 @@ use Phockito\internal\Clazz\MethodFactory;
 use Phockito\internal\Clazz\ParameterFactory;
 use Phockito\Test\MockMe;
 
-class LegacyContextTest extends \PHPUnit_Framework_TestCase
+class LegacyMockContextTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var ClazzFactory
@@ -23,7 +23,7 @@ class LegacyContextTest extends \PHPUnit_Framework_TestCase
     public function test()
     {
         $clazz = $this->classFactory->createFromReflectionClass(new \ReflectionClass(MockMe::class));
-        $context = new LegacyContext($clazz, false);
+        $context = new LegacyMockContext($clazz, false);
 
         $returnValue = $context->call('Bar', []);
 
@@ -34,7 +34,7 @@ class LegacyContextTest extends \PHPUnit_Framework_TestCase
     public function testPartial()
     {
         $clazz = $this->classFactory->createFromReflectionClass(new \ReflectionClass(MockMe::class));
-        $context = new LegacyContext($clazz, true);
+        $context = new LegacyMockContext($clazz, true);
 
         $returnValue = $context->call('Foo', []);
 

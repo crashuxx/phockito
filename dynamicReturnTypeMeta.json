@@ -12,6 +12,11 @@
         },
         {
             "class": "\\Phockito\\Phockito",
+            "method": "spy",
+            "position": 0
+        },
+        {
+            "class": "\\Phockito\\Phockito",
             "method": "verify",
             "position": 0
         },
@@ -29,6 +34,10 @@
         },
         {
             "function": "\\mock",
+            "position": 0
+        },
+        {
+            "function": "\\spy",
             "position": 0
         },
         {

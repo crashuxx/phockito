@@ -3,6 +3,8 @@
 namespace Phockito\Test;
 
 
+use Exception;
+
 class SpyMe {
     public $constructor_arg = false;
     function __construct($arg = true) { $this->constructor_arg = $arg; }
