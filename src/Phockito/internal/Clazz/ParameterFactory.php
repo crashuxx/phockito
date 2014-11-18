@@ -31,6 +31,8 @@ class ParameterFactory
             } else {
                 $defaultValue = new ParameterScalarValue($reflectionParameter->getDefaultValue());
             }
+        } else if ($reflectionParameter->isOptional()) {
+            $defaultValue = new ParameterScalarValue(null);
         }
 
         return new Parameter($reflectionParameter->getName(), $type, $defaultValue, $reflectionParameter->isPassedByReference());
