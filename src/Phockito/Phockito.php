@@ -281,7 +281,7 @@ class Phockito
         }
 
         foreach ($clazz->getMethods() as $method) {
-            if (!strcasecmp('__construct', $method->getName())) {
+            if (!strcasecmp('__construct', $method->getName()) || !strcasecmp($reflect->getShortName(), $method->getName())) {
             } else if (!strcasecmp('__toString', $method->getName())) {
             } else if (!strcasecmp('__call', $method->getName())) {
             } else {
