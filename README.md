@@ -7,6 +7,10 @@ Checkout [the original's website](http://mockito.org/) for the philosophy behind
 
 Thanks to the developers of Mockito for the inspiration, and hamcrest-php for making this easy.
 
+master: [![Build Status](https://travis-ci.org/crashuxx/phockito.svg?branch=master)](https://travis-ci.org/crashuxx/phockito)
+
+2.x: [![Build Status](https://travis-ci.org/crashuxx/phockito.svg?branch=2.x)](https://travis-ci.org/crashuxx/phockito)
+
 ## Example mocking:
 
 ```php
