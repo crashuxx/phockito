@@ -275,9 +275,9 @@ class Phockito
         }
 
         if ($clazz->isInterface()) {
-            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), MockMarker::class . ', \Phockito\internal\Marker\MockMarker');
+            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), \Phockito\internal\Marker\MockMarker::class);
         } else {
-            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), MockMarker::class . ', \Phockito\internal\Marker\MockMarker');
+            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), \Phockito\internal\Marker\MockMarker::class);
         }
 
         foreach ($clazz->getMethods() as $method) {
