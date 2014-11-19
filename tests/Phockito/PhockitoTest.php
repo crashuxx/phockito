@@ -65,7 +65,7 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
 
     function testCanCreateMockOfProtected()
     {
-        $mock = Phockito::mock(FooIsProtected::class);
+        Phockito::mock(FooIsProtected::class);
     }
 
     function testCanCreateMockMethodWithIntegerDefaultArgument()
