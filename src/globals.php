@@ -2,7 +2,7 @@
 
 use Hamcrest\Matcher;
 use Phockito\HamcrestTypeBridge;
-use Phockito\MockMarker;
+use Phockito\internal\Marker\MockMarker;
 use Phockito\Phockito;
 use Phockito\VerificationMode\VerificationMode;
 use Phockito\VerifyBuilder;

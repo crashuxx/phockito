@@ -11,6 +11,8 @@ use Phockito\internal\Context\LegacyContext;
 use Phockito\internal\Context\LegacyMockContext;
 use Phockito\internal\Context\LegacySpyContext;
 use Phockito\internal\EnhancedClazz;
+use Phockito\internal\Marker\MockMarker;
+use Phockito\internal\When\LegacyWhenBuilder;
 use Phockito\internal\Writer\DefaultWriter;
 use Phockito\VerificationMode\AtLeast;
 use Phockito\VerificationMode\AtMost;
@@ -18,10 +20,7 @@ use Phockito\VerificationMode\NoMoreInteractions;
 use Phockito\VerificationMode\Only;
 use Phockito\VerificationMode\Times;
 use Phockito\VerificationMode\VerificationMode;
-use Reflection;
 use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
 
 
 /**
@@ -269,15 +268,14 @@ class Phockito
 
         $mockerClass = $reflect->getShortName() . md5(rand(0, 100000));
 
-        $rootNamespace = $reflect->getNamespaceName() ? '' : '\\';
         if ($reflect->getNamespaceName()) {
             $writer->writeNamespace($reflect->getNamespaceName());
         }
 
         if ($clazz->isInterface()) {
-            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), \Phockito\internal\Marker\MockMarker::class);
+            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), MockMarker::class);
         } else {
-            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), \Phockito\internal\Marker\MockMarker::class);
+            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), MockMarker::class);
         }
 
         foreach ($clazz->getMethods() as $method) {
@@ -619,21 +617,18 @@ class Phockito
      */
     static function when($arg = null)
     {
-        if ($arg instanceof \Phockito\internal\Marker\MockMarker) {
+        if ($arg instanceof MockMarker) {
             /** @vat \Phockito\internal\Marker\MockMarker $arg */
             $context = $arg->__phockito_context;
 
             if ($context instanceof LegacyContext) {
-                return new WhenBuilder($context->getPhockitoInstanceId(), $context->getClazz()->getName());
+                return new LegacyWhenBuilder($context->getPhockitoInstanceId(), $context->getClazz()->getName());
             }
-
-        } else if ($arg instanceof MockMarker) {
-            return new WhenBuilder($arg->__phockito_instanceid, $arg->__phockito_class);
         }
 
         /** @var Invocation $invocation */
         $invocation = array_shift(self::$_invocation_list);
-        return new WhenBuilder($invocation->instanceId, $invocation->className, $invocation->methodName, $invocation->args);
+        return new LegacyWhenBuilder($invocation->instanceId, $invocation->className, $invocation->methodName, $invocation->args);
     }
 
     /**
@@ -647,7 +642,7 @@ class Phockito
      */
     static function verify($mock, $times = 1)
     {
-        if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
+        if ($mock instanceof MockMarker) {
             /** @vat \Phockito\internal\Marker\MockMarker $arg */
             $context = $mock->__phockito_context;
 
@@ -710,13 +705,13 @@ class Phockito
     /**
      * Reset a mock instance. Forget all calls and stubbed responses for a given instance
      * @static
-     * @param MockMarker|Object $mock - The mock instance to reset
+     * @param MockMarker|object $mock - The mock instance to reset
      * @param string $method
      */
     static function reset($mock, $method = null)
     {
         // Get the instance ID. Only resets instance-specific info ATM
-        if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
+        if ($mock instanceof MockMarker) {
             /** @vat \Phockito\internal\Marker\MockMarker $arg */
             $context = $mock->__phockito_context;
 
@@ -724,7 +719,7 @@ class Phockito
                 $instance = $context->getPhockitoInstanceId();
             }
         } else {
-            $instance = $mock->__phockito_instanceid;
+            throw new \InvalidArgumentException('Argument "$mock" must be instance of ' . MockMarker::class);
         }
 
         // Remove any stored returns
@@ -756,17 +751,16 @@ class Phockito
 
         $noMoreInteractionsVerificationMode = new NoMoreInteractions();
 
-        /** @var MockMarker $mock */
         foreach ($mocks as $mock) {
-            if ($mock instanceof \Phockito\internal\Marker\MockMarker) {
-                /** @vat \Phockito\internal\Marker\MockMarker $arg */
+            if ($mock instanceof MockMarker) {
+                /** @vat \MockMarker $arg */
                 $context = $mock->__phockito_context;
 
                 if ($context instanceof LegacyMockContext) {
                     $instance = $context->getPhockitoInstanceId();
                 }
             } else {
-                $instance = $mock->__phockito_instanceid;
+                throw new \InvalidArgumentException('Argument of array "$mocks" contains invalid object, "' . MockMarker::class . '" required~');
             }
 
             $verificationContext = new VerificationContext($instance, null, array());
