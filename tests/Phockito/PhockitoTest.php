@@ -55,11 +55,15 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
         $this->assertNull($mock->Foo());
     }
 
+    /**
+     * @deprecated
+     * Is there a reason to mock static methods ?
+     */
     function testCanCreateMockOfStatic()
     {
-        $this->markTestSkipped();
+        $this->markTestSkipped('Is there a reason to mock static methods ?');
 
-        $mock = Phockito::mock_class(FooIsStatic::class);
+        $mock = Phockito::mock(FooIsStatic::class);
         $this->assertNull($mock::Foo());
     }
 
