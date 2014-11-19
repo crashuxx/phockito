@@ -76,8 +76,19 @@ class Method
         return in_array('static', $this->modifiers);
     }
 
+    /**
+     * @return bool
+     */
     public function isAbstract()
     {
         return in_array('abstract', $this->modifiers);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFinal()
+    {
+        return in_array('final', $this->modifiers);
     }
 }

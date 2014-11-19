@@ -284,7 +284,9 @@ class Phockito
             if (!strcasecmp('__construct', $method->getName()) || !strcasecmp($reflect->getShortName(), $method->getName())) {
             } else if (!strcasecmp('__toString', $method->getName())) {
             } else if (!strcasecmp('__call', $method->getName())) {
-            } else {
+            } else if ($method->isFinal() && !self::$ignore_finals) {
+                user_error('Class ' . $mockedClass . ' has final method ' . $method->getName() . ', which we can\'t mock', E_USER_WARNING);
+            } else if (!$method->isFinal()) {
                 $writer->writeMethod($method);
             }
         }
