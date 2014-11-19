@@ -260,8 +260,6 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
 
     function testCanSpecifyReturnValueForUndefinedFunction()
     {
-        $this->markTestSkipped();
-
         $mock = Phockito::mock(MockMe::class);
         Phockito::when($mock->Quux())->return('Quux');
 
