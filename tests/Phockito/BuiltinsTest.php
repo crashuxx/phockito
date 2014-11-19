@@ -18,7 +18,9 @@ class BuiltinsTest extends PHPUnit_Framework_TestCase
         $mock = Phockito::mock(SoapClient::class);
 
         $this->assertInstanceOf(SoapClient::class, $mock);
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->assertNull($mock->Foo());
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->assertNull($mock->Bar());
     }
 
