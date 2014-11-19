@@ -2,7 +2,10 @@
     "name": "crashuxx/phockito",
     "description": "PHP Mocking framework inspired by Mockito for Java",
     "keywords": ["mocks", "testing", "mockito"],
-    "license": "BSD-3-Clause",
+  "license": [
+    "BSD-3-Clause",
+    "Apache-2.0"
+  ],
     "authors": [
         {
             "name": "Hamish Friedlander",
