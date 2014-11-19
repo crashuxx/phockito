@@ -12,6 +12,7 @@ use Phockito\internal\Context\LegacyMockContext;
 use Phockito\internal\Context\LegacySpyContext;
 use Phockito\internal\EnhancedClazz;
 use Phockito\internal\Marker\MockMarker;
+use Phockito\internal\Verify\LegacyVerifyBuilder;
 use Phockito\internal\When\LegacyWhenBuilder;
 use Phockito\internal\Writer\DefaultWriter;
 use Phockito\VerificationMode\AtLeast;
@@ -647,11 +648,11 @@ class Phockito
             $context = $mock->__phockito_context;
 
             if ($context instanceof LegacyContext) {
-                return new VerifyBuilder($context->getPhockitoInstanceId(), $times);
+                return new LegacyVerifyBuilder($context->getPhockitoInstanceId(), $times);
             }
         }
 
-        return new VerifyBuilder($mock->__phockito_instanceid, $times);
+        return new LegacyVerifyBuilder($mock->__phockito_instanceid, $times);
     }
 
     /**
