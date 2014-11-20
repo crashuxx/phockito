@@ -100,7 +100,7 @@ class Phockito
     /**
      * Array of most-recent-first calls. Each item is an array of (instance, method, args) named hashes.
      * @deprecated
-     * @var Invocation[]
+     * @var LegacyInvocation[]
      */
     public static $_invocation_list = array();
 
@@ -197,7 +197,7 @@ class Phockito
     public static function __called($class, $instance, $method, $args)
     {
         // Record the call as most recent first
-        $invocation = new Invocation($class, $instance, $method, $args, debug_backtrace(0));
+        $invocation = new LegacyInvocation($class, $instance, $method, $args, debug_backtrace(0));
         array_unshift(self::$_invocation_list, $invocation);
 
         // Look up any stubbed responses
@@ -351,7 +351,7 @@ class Phockito
             }
         }
 
-        /** @var Invocation $invocation */
+        /** @var LegacyInvocation $invocation */
         $invocation = array_shift(self::$_invocation_list);
         return new LegacyWhenBuilder($invocation->instanceId, $invocation->className, $invocation->methodName, $invocation->args);
     }
@@ -455,7 +455,7 @@ class Phockito
         }
 
         // Remove all call history
-        /** @var Invocation $invocation */
+        /** @var LegacyInvocation $invocation */
         foreach (self::$_invocation_list as $i => $invocation) {
             if (($method && $invocation->matchesInstanceAndMethod($instance, $method)) ||
                 ($method == null && $invocation->matchesInstance($instance))

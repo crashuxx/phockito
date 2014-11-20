@@ -10,7 +10,7 @@ use PHPUnit_Framework_TestCase;
 
 class NumericalVerificationFailureMessageTest extends PHPUnit_Framework_TestCase
 {
-    /** @var Invocation */
+    /** @var LegacyInvocation */
     private $_mockInvocation;
     /** @var VerificationContext */
     private $_mockContext;
@@ -19,7 +19,7 @@ class NumericalVerificationFailureMessageTest extends PHPUnit_Framework_TestCase
 
     function setUp()
     {
-        $this->_mockInvocation = Phockito::mock(Invocation::class);
+        $this->_mockInvocation = Phockito::mock(LegacyInvocation::class);
         $this->_mockInvocation->args = array('actualArg');
 
         $this->_mockContext = Phockito::mock(VerificationContext::class);

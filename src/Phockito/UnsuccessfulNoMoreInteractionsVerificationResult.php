@@ -5,10 +5,10 @@ namespace Phockito;
 
 class UnsuccessfulNoMoreInteractionsVerificationResult implements UnsuccessfulVerificationResult
 {
-    /** @var Invocation */
+    /** @var LegacyInvocation */
     private $_invocation;
 
-    function __construct(Invocation $_invocation)
+    function __construct(LegacyInvocation $_invocation)
     {
         $this->_invocation = $_invocation;
     }

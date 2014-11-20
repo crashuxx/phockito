@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase;
 
 class NoMoreInteractionsVerificationFailureMessageTest extends PHPUnit_Framework_TestCase
 {
-    /** @var Invocation */
+    /** @var LegacyInvocation */
     private $_mockInvocation;
     /** @var VerificationContext */
     private $_mockContext;
@@ -16,7 +16,7 @@ class NoMoreInteractionsVerificationFailureMessageTest extends PHPUnit_Framework
 
     function setUp()
     {
-        $this->_mockInvocation = Phockito::mock(Invocation::class);
+        $this->_mockInvocation = Phockito::mock(LegacyInvocation::class);
         $this->_mockInvocation->args = array('actualArg');
         $this->_mockInvocation->backtrace = array(
             array('dummy - eval()\'d code'),

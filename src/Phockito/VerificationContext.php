@@ -22,26 +22,26 @@ class VerificationContext
     }
 
     /**
-     * @return Invocation[]
+     * @return LegacyInvocation[]
      */
     function getAllInvocationsOnMock()
     {
         return $invocationsForMock = array_filter(
             Phockito::$_invocation_list,
-            function (Invocation $invocation) {
+            function (LegacyInvocation $invocation) {
                 return $invocation->matchesInstance($this->_mockInstanceId);
             }
         );
     }
 
     /**
-     * @return Invocation[]
+     * @return LegacyInvocation[]
      */
     function getMatchingInvocations()
     {
         return $invocationsForMock = array_filter(
             Phockito::$_invocation_list,
-            function (Invocation $invocation) {
+            function (LegacyInvocation $invocation) {
                 return $invocation->matchesInstanceAndMethod($this->_mockInstanceId, $this->_methodToVerify)
                 && $invocation->matchesArguments($this->_argumentsToVerify);
             }
