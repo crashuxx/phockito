@@ -265,8 +265,10 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
     function testCanSpecifyReturnValueForUndefinedFunction()
     {
         $mock = Phockito::mock(MockMe::class);
+        /** @noinspection PhpUndefinedMethodInspection */
         Phockito::when($mock->Quux())->return('Quux');
 
+        /** @noinspection PhpUndefinedMethodInspection */
         $this->assertEquals('Quux', $mock->Quux());
     }
 
@@ -671,8 +673,7 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \PHPUnit_Framework_Error
-     * @expectedExceptionCode E_USER_ERROR
+     * @expectedException \Reflection\ProxyException
      */
     function testCannotMockFinalClass()
     {

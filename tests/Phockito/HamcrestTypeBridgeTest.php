@@ -7,7 +7,6 @@ use Phockito\Test\FinalClass;
 use Phockito\Test\HamcrestMe;
 use Phockito\Test\MockMeConstructor;
 use Phockito\Test\PassMe;
-use PHPUnit_Framework_Error;
 use PHPUnit_Framework_TestCase;
 
 class HamcrestTypeBridgeTest extends PHPUnit_Framework_TestCase
@@ -35,9 +34,9 @@ class HamcrestTypeBridgeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException PHPUnit_Framework_Error
-     * @expectedExceptionCode E_USER_ERROR
-     * @expectedExceptionMessage Can't mock non-existent class NotAClass
+     * @expectedException \ReflectionException
+     * @ expectedExceptionCode E_USER_ERROR
+     * @ expectedExceptionMessage Can't mock non-existent class NotAClass
      */
     function testBridgingInvalidTypeThrowsException()
     {
@@ -47,8 +46,7 @@ class HamcrestTypeBridgeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException PHPUnit_Framework_Error
-     * @expectedExceptionCode E_USER_ERROR
+     * @expectedException \Reflection\ProxyException
      */
     function testCannotBridgeFinalType()
     {

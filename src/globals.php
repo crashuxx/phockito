@@ -98,7 +98,7 @@ function only() {
 /**
  * @param $type
  * @param Matcher $matcher
- * @return Object
+ * @return object|mixed
  */
 function argOfTypeThat($type, Matcher $matcher) {
     return HamcrestTypeBridge::argOfTypeThat($type, $matcher);

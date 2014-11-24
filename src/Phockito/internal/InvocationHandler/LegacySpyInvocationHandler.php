@@ -1,6 +1,6 @@
 <?php
 
-namespace Phockito\internal\Context;
+namespace Phockito\internal\InvocationHandler;
 
 
 use Hamcrest\Core\IsAnything;
@@ -9,8 +9,10 @@ use Phockito\internal\Clazz\Method;
 use Phockito\internal\Clazz\Parameter;
 use Phockito\internal\Clazz\Type;
 use Phockito\Phockito;
+use Reflection\InvocationHandler;
+use Reflection\ProxyClass;
 
-class LegacySpyContext implements LegacyContext
+class LegacySpyInvocationHandler implements InvocationHandler
 {
     /**
      * @var Clazz
@@ -24,45 +26,51 @@ class LegacySpyContext implements LegacyContext
      * @var string
      */
     private $phockito_instanceid;
+    /**
+     * @var ProxyClass
+     */
+    private $proxyClass;
 
     /**
      * @param Clazz $clazz
+     * @param ProxyClass $proxyClass
      * @param object $object
      */
-    function __construct(Clazz $clazz, $object)
+    function __construct(Clazz $clazz, ProxyClass $proxyClass, $object)
     {
         $this->clazz = $clazz;
         $this->object = $object;
 
         $this->phockito_instanceid = $this->clazz->getName() . ':' . (++Phockito::$_instanceid_counter);
+        $this->proxyClass = $proxyClass;
     }
 
     /**
-     * @param string $name
-     * @param array $args
-     * @return ReturnValue
+     * @param object $proxy
+     * @param string $method
+     * @param mixed[] $args
+     * @return mixed
      */
-    function call($name, array $args)
+    public function invoke($proxy, $method, $args)
     {
         try {
-            $method = $this->clazz->getMethod($name);
+            $methodObject = $this->clazz->getMethod($method);
         } catch (\RuntimeException $e) {
             $parameters = [];
             foreach ($args as $k => $arg) {
                 $parameters[] = new Parameter($k, new Type('mixed', new IsAnything()), null);
             }
-            $method = new Method($name, $parameters, new Type('mixed', new IsAnything()), []);
+            $methodObject = new Method($method, $parameters, new Type('mixed', new IsAnything()), []);
         }
 
-        $instance = $method->isStatic() ? ('::' . $this->clazz->getName()) : $this->phockito_instanceid;
+        $instance = $methodObject->isStatic() ? ('::' . $this->clazz->getName()) : $this->phockito_instanceid;
 
-        Phockito::__called($this->clazz->getName(), $instance, $name, $args);
+        Phockito::__called($this->clazz->getName(), $instance, $method, $args);
 
-        if (!method_exists($this->object, $name) && $name == '__toString') {
-            $returnValue = new ReturnValue(false, '');
+        if (!method_exists($this->object, $method) && $method == '__toString') {
+            $returnValue = '';
         } else {
-            $result = call_user_func_array([$this->object, $name], $args);
-            $returnValue = new ReturnValue(false, $result);
+            $returnValue = call_user_func_array([$this->object, $method], $args);
         }
 
         return $returnValue;

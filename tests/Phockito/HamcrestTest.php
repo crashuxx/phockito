@@ -35,7 +35,7 @@ class HamcrestTest extends PHPUnit_Framework_TestCase
     {
         $mock = Phockito::mock(MockPassMe::class);
 
-        Phockito::when($mock)->Baz(anything())->return('PassMe');
+        Phockito::when($mock->Baz(HamcrestTypeBridge::argOfTypeThat(PassMe::class, anything())))->return('PassMe');
 
         $this->assertEquals($mock->Baz(new PassMe()), 'PassMe');
     }

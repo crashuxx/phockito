@@ -1,14 +1,15 @@
 <?php
 
-namespace Phockito\internal\Context;
+namespace Phockito\internal\InvocationHandler;
 
 
 use Phockito\internal\Clazz\ClazzFactory;
 use Phockito\internal\Clazz\MethodFactory;
 use Phockito\internal\Clazz\ParameterFactory;
 use Phockito\Test\SpyMe;
+use Reflection\Proxy;
 
-class LegacySpyContextTest extends \PHPUnit_Framework_TestCase
+class LegacySpyInvocationHandlerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var ClazzFactory
@@ -22,20 +23,21 @@ class LegacySpyContextTest extends \PHPUnit_Framework_TestCase
 
     public function testGetters()
     {
+        $proxyClass = Proxy::getProxyClass(SpyMe::class);
         $clazz = $this->classFactory->createFromReflectionClass(new \ReflectionClass(SpyMe::class));
-        $context = new LegacySpyContext($clazz, new SpyMe());
+        $context = new LegacySpyInvocationHandler($clazz, $proxyClass, new SpyMe());
 
         $this->assertEquals($clazz, $context->getClazz());
     }
 
     public function test()
     {
+        $proxyClass = Proxy::getProxyClass(SpyMe::class);
         $clazz = $this->classFactory->createFromReflectionClass(new \ReflectionClass(SpyMe::class));
-        $context = new LegacySpyContext($clazz, new SpyMe());
+        $context = new LegacySpyInvocationHandler($clazz, $proxyClass, new SpyMe());
 
-        $returnValue = $context->call('Baz', ['lorem ipsum']);
+        $returnValue = $context->invoke($proxyClass->newInstance($context), 'Baz', ['lorem ipsum']);
 
-        $this->assertFalse($returnValue->invokeParent());
-        $this->assertEquals('lorem ipsum', $returnValue->getValue());
+        $this->assertEquals('lorem ipsum', $returnValue);
     }
 }

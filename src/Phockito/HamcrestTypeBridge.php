@@ -13,7 +13,7 @@ class HamcrestTypeBridge
      *
      * @param string $type Name of the class to subtype
      * @param Matcher $matcher The matcher to proxy
-     * @return Object A special mock of type $type that wraps $matcher, circumventing type issues.
+     * @return object|mixed A special mock of type $type that wraps $matcher, circumventing type issues.
      */
     public static function argOfTypeThat($type, Matcher $matcher)
     {

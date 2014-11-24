@@ -7,20 +7,18 @@ use Hamcrest\Matcher;
 use Phockito\internal\Clazz\ClazzFactory;
 use Phockito\internal\Clazz\MethodFactory;
 use Phockito\internal\Clazz\ParameterFactory;
-use Phockito\internal\Context\LegacyContext;
-use Phockito\internal\Context\LegacyMockContext;
-use Phockito\internal\Context\LegacySpyContext;
-use Phockito\internal\EnhancedClazz;
+use Phockito\internal\InvocationHandler\LegacyMockInvocationHandler;
+use Phockito\internal\InvocationHandler\LegacySpyInvocationHandler;
 use Phockito\internal\Marker\MockMarker;
 use Phockito\internal\Verify\LegacyVerifyBuilder;
 use Phockito\internal\When\LegacyWhenBuilder;
-use Phockito\internal\Writer\DefaultWriter;
 use Phockito\VerificationMode\AtLeast;
 use Phockito\VerificationMode\AtMost;
 use Phockito\VerificationMode\NoMoreInteractions;
 use Phockito\VerificationMode\Only;
 use Phockito\VerificationMode\Times;
 use Phockito\VerificationMode\VerificationMode;
+use Reflection\Proxy;
 use ReflectionClass;
 
 
@@ -250,72 +248,6 @@ class Phockito
     /* ** INTERNAL INTERFACES END ** */
 
     /**
-     * Passed a class as a string to create the mock as, and the class as a string to mock,
-     * create the mocking class php and eval it into the current running environment
-     *
-     * @deprecated
-     * @static
-     * @param bool $partial - Should test double be a partial or a full mock
-     * @param string $mockedClass - The name of the class (or interface) to create a mock of
-     * @return EnhancedClazz The name of the mocker class
-     */
-    protected static function build_test_double($partial, $mockedClass)
-    {
-        // Bail if we were passed a classname that doesn't exist
-        if (!class_exists($mockedClass) && !interface_exists($mockedClass)) {
-            user_error(
-                "Can't mock non-existent class $mockedClass",
-                E_USER_ERROR
-            );
-        }
-
-        // Reflect on the mocked class
-        $reflect = new ReflectionClass($mockedClass);
-
-        if ($reflect->isFinal()) {
-            user_error("Can't mock final class $mockedClass", E_USER_ERROR);
-        }
-
-        $classFactory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
-
-        $clazz = $classFactory->createFromReflectionClass($reflect);
-
-        $writer = new DefaultWriter();
-
-        $mockerClass = $reflect->getShortName() . md5(rand(0, 100000));
-
-        if ($reflect->getNamespaceName()) {
-            $writer->writeNamespace($reflect->getNamespaceName());
-        }
-
-        if ($clazz->isInterface()) {
-            $writer->writeInterfaceExtend($mockerClass, $reflect->getShortName(), MockMarker::class);
-        } else {
-            $writer->writeClassExtend($mockerClass, $reflect->getShortName(), MockMarker::class);
-        }
-
-        foreach ($clazz->getMethods() as $method) {
-            if (!strcasecmp('__construct', $method->getName()) || !strcasecmp($reflect->getShortName(), $method->getName())) {
-            } else if (!strcasecmp('__toString', $method->getName())) {
-            } else if (!strcasecmp('__call', $method->getName())) {
-            } else if ($method->isFinal() && !self::$ignore_finals) {
-                user_error('Class ' . $mockedClass . ' has final method ' . $method->getName() . ', which we can\'t mock', E_USER_WARNING);
-            } else if (!$method->isFinal()) {
-                $writer->writeMethod($method);
-            }
-        }
-
-        $writer->writeToStringMethod();
-        $writer->writeCallMethod();
-        $writer->writeClose();
-
-        eval($writer->build());
-
-        $fullMockClass = trim('\\' . $reflect->getNamespaceName() . '\\' . $mockerClass, '\\');
-        return new EnhancedClazz($fullMockClass, $clazz);
-    }
-
-    /**
      * Alternative name for mock_instance
      *
      * @param $class
@@ -323,14 +255,28 @@ class Phockito
      */
     public static function mock($class)
     {
-        $enhancedClazz = self::build_test_double(false, $class);
-        return $enhancedClazz->newInstance(new LegacyMockContext($enhancedClazz->getClazz()));
+        $reflect = new ReflectionClass($class);
+        $classFactory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
+        $clazz = $classFactory->createFromReflectionClass($reflect);
+
+        $proxyClass = Proxy::getProxyClass($class);
+
+        $invocationHandler = new LegacyMockInvocationHandler($clazz, $proxyClass);
+
+        return $proxyClass->newInstance($invocationHandler);
     }
 
     public static function spy($object)
     {
-        $enhancedClazz = self::build_test_double(false, get_class($object));
-        return $enhancedClazz->newInstance(new LegacySpyContext($enhancedClazz->getClazz(), $object));
+        $reflect = new ReflectionClass($object);
+        $classFactory = new ClazzFactory(new MethodFactory(new ParameterFactory()));
+        $clazz = $classFactory->createFromReflectionClass($reflect);
+
+        $proxyClass = Proxy::getProxyClass($reflect->getName());
+
+        $invocationHandler = new LegacySpyInvocationHandler($clazz, $proxyClass, $object);
+
+        return $proxyClass->newInstance($invocationHandler);
     }
 
     /**
@@ -340,15 +286,13 @@ class Phockito
      * @param MockMarker|object|mixed|null $arg
      * @return WhenBuilder|Object
      */
-    static function when($arg = null)
+    static function when($mock = null)
     {
-        if ($arg instanceof MockMarker) {
-            /** @vat \Phockito\internal\Marker\MockMarker $arg */
-            $context = $arg->__phockito_context;
+        if (Proxy::isProxyClass($mock)) {
+            $invocationHandler = Proxy::getInvocationHandler($mock);
+            /** @var LegacyMockInvocationHandler $invocationHandler */
 
-            if ($context instanceof LegacyContext) {
-                return new LegacyWhenBuilder($context->getPhockitoInstanceId(), $context->getClazz()->getName());
-            }
+            return new LegacyWhenBuilder($invocationHandler->getPhockitoInstanceId(), $invocationHandler->getClazz()->getName());
         }
 
         /** @var LegacyInvocation $invocation */
@@ -367,16 +311,14 @@ class Phockito
      */
     static function verify($mock, $times = 1)
     {
-        if ($mock instanceof MockMarker) {
-            /** @vat \Phockito\internal\Marker\MockMarker $arg */
-            $context = $mock->__phockito_context;
+        if (Proxy::isProxyClass($mock)) {
+            $invocationHandler = Proxy::getInvocationHandler($mock);
+            /** @var LegacyMockInvocationHandler $invocationHandler */
 
-            if ($context instanceof LegacyContext) {
-                return new LegacyVerifyBuilder($context->getPhockitoInstanceId(), $times);
-            }
+            return new LegacyVerifyBuilder($invocationHandler->getPhockitoInstanceId(), $times);
         }
 
-        return new LegacyVerifyBuilder($mock->__phockito_instanceid, $times);
+        throw new \RuntimeException();
     }
 
     /**
@@ -435,16 +377,13 @@ class Phockito
      */
     static function reset($mock, $method = null)
     {
-        // Get the instance ID. Only resets instance-specific info ATM
-        if ($mock instanceof MockMarker) {
-            /** @vat \Phockito\internal\Marker\MockMarker $arg */
-            $context = $mock->__phockito_context;
+        if (Proxy::isProxyClass($mock)) {
+            $invocationHandler = Proxy::getInvocationHandler($mock);
+            /** @var LegacyMockInvocationHandler $invocationHandler */
 
-            if ($context instanceof LegacyMockContext) {
-                $instance = $context->getPhockitoInstanceId();
-            }
+            $instance = $invocationHandler->getPhockitoInstanceId();
         } else {
-            throw new \InvalidArgumentException('Argument "$mock" must be instance of ' . MockMarker::class);
+            throw new \RuntimeException();
         }
 
         // Remove any stored returns
@@ -477,13 +416,11 @@ class Phockito
         $noMoreInteractionsVerificationMode = new NoMoreInteractions();
 
         foreach ($mocks as $mock) {
-            if ($mock instanceof MockMarker) {
-                /** @vat \MockMarker $arg */
-                $context = $mock->__phockito_context;
+            if (Proxy::isProxyClass($mock)) {
+                $invocationHandler = Proxy::getInvocationHandler($mock);
+                /** @var LegacyMockInvocationHandler $invocationHandler */
 
-                if ($context instanceof LegacyMockContext) {
-                    $instance = $context->getPhockitoInstanceId();
-                }
+                $instance = $invocationHandler->getPhockitoInstanceId();
             } else {
                 throw new \InvalidArgumentException('Argument of array "$mocks" contains invalid object, "' . MockMarker::class . '" required~');
             }
