@@ -35,6 +35,10 @@
             "function": "\\maskExample",
             "position": 0,
             "mask": "Test%sModel"
+        },
+        {
+            "function": "\\any",
+            "position": 0
         }
     ]
 }
