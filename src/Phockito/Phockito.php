@@ -286,7 +286,7 @@ class Phockito
      * @param MockMarker|object|mixed|null $arg
      * @return WhenBuilder|Object
      */
-    static function when($mock = null)
+    public static function when($mock = null)
     {
         if (Proxy::isProxyClass($mock)) {
             $invocationHandler = Proxy::getInvocationHandler($mock);
@@ -309,7 +309,7 @@ class Phockito
      * @param string|int $times - The number of times the method should be called, either a number, or a number followed by "+"
      * @return mixed|VerifyBuilder
      */
-    static function verify($mock, $times = 1)
+    public static function verify($mock, $times = 1)
     {
         if (Proxy::isProxyClass($mock)) {
             $invocationHandler = Proxy::getInvocationHandler($mock);
@@ -325,7 +325,7 @@ class Phockito
      * @param int $times
      * @return VerificationMode
      */
-    static function times($times)
+    public static function times($times)
     {
         return new Times($times);
     }
@@ -333,7 +333,7 @@ class Phockito
     /**
      * @return VerificationMode
      */
-    static function never()
+    public static function never()
     {
         return self::times(0);
     }
@@ -342,7 +342,7 @@ class Phockito
      * @param int $times
      * @return VerificationMode
      */
-    static function atLeast($times)
+    public static function atLeast($times)
     {
         return new AtLeast($times);
     }
@@ -350,7 +350,7 @@ class Phockito
     /**
      * @return VerificationMode
      */
-    static function atLeastOnce()
+    public static function atLeastOnce()
     {
         return self::atLeast(1);
     }
@@ -359,12 +359,12 @@ class Phockito
      * @param int $times
      * @return VerificationMode
      */
-    static function atMost($times)
+    public static function atMost($times)
     {
         return new AtMost($times);
     }
 
-    static function only()
+    public static function only()
     {
         return new Only();
     }
@@ -375,7 +375,7 @@ class Phockito
      * @param MockMarker|object $mock - The mock instance to reset
      * @param string $method
      */
-    static function reset($mock, $method = null)
+    public static function reset($mock, $method = null)
     {
         if (Proxy::isProxyClass($mock)) {
             $invocationHandler = Proxy::getInvocationHandler($mock);
@@ -405,9 +405,9 @@ class Phockito
     }
 
     /**
-     * @param MockMarker|Object|array $mocks
+     * @param MockMarker|object|array $mocks
      */
-    static function verifyNoMoreInteractions($mocks)
+    public static function verifyNoMoreInteractions($mocks)
     {
         if (!is_array($mocks)) {
             $mocks = array($mocks);
@@ -433,8 +433,3 @@ class Phockito
         }
     }
 }
-
-
-
-
-
