@@ -19,31 +19,20 @@
             "class": "\\Phockito\\Phockito",
             "method": "verify",
             "position": 0
-        },
-        {
-            "class": "\\Phockito\\Phockito",
-            "method": "maskExample",
-            "position": 0,
-            "mask": "Test%sModel"
         }
     ],
     "functionCalls": [
         {
-            "function": "\\verify",
+            "function": "\\Phockito\\verify",
             "position": 0
         },
         {
-            "function": "\\mock",
+            "function": "\\Phockito\\mock",
             "position": 0
         },
         {
-            "function": "\\spy",
+            "function": "\\Phockito\\spy",
             "position": 0
-        },
-        {
-            "function": "\\maskExample",
-            "position": 0,
-            "mask": "Test%sModel"
         }
     ]
 }
