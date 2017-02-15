@@ -33,6 +33,18 @@
         {
             "function": "\\Phockito\\spy",
             "position": 0
+        },
+        {
+            "function": "\\verify",
+            "position": 0
+        },
+        {
+            "function": "\\mock",
+            "position": 0
+        },
+        {
+            "function": "\\spy",
+            "position": 0
         }
     ]
 }
