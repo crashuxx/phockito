@@ -35,6 +35,18 @@ class MethodFactory
 
         $modifiers = Reflection::getModifierNames($reflectionMethod->getModifiers());
 
-        return new Method($reflectionMethod->getName(), $parameters, new Type('mixed', new IsAnything(), $reflectionMethod->returnsReference()), $modifiers);
+        // @fixme
+        if ($reflectionMethod->hasReturnType()) {
+            $type = $reflectionMethod->getReturnType();
+            if ($type->isBuiltin()) {
+                $returnType = (string)$type;
+            } else {
+                $returnType = '\\'.$type;
+            }
+        } else {
+            $returnType = 'mixed';
+        }
+
+        return new Method($reflectionMethod->getName(), $parameters, new Type($returnType, new IsAnything(), $reflectionMethod->returnsReference()), $modifiers);
     }
 }

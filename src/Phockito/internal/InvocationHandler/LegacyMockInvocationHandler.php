@@ -10,6 +10,8 @@ use Phockito\internal\Clazz\Parameter;
 use Phockito\internal\Clazz\Type;
 use Phockito\Phockito;
 use Reflection\InvocationHandler;
+use Reflection\InvocationHandler\DummyInvocationHandler;
+use Reflection\Proxy;
 use Reflection\ProxyClass;
 
 class LegacyMockInvocationHandler implements InvocationHandler
@@ -112,7 +114,15 @@ class LegacyMockInvocationHandler implements InvocationHandler
                 if ($parentClass->hasMethod($method) && $this->invokeParentMethod($method)) {
                     $returnValue = $this->proxyClass->getParentClass()->getMethod($method)->invokeArgs($proxy, $args);
                 } else {
-                    $returnValue = null;
+                    // @fixme
+                    $returnType = $methodObj->getReturnType();
+                    if ($returnType->getValue() == 'mixed') {
+                        $returnValue = null;
+                    } else if ($returnType->getValue() == 'string') {
+                        $returnValue = '';
+                    } else {
+                        $returnValue = Proxy::newProxyInstance($returnType->getValue(), new DummyInvocationHandler());
+                    }
                 }
             }
         }

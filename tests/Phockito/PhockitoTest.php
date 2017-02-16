@@ -13,6 +13,7 @@ use Phockito\Test\FooReturnsByReferenceImplements;
 use Phockito\Test\FooReturnsByReferenceNoImplements;
 use Phockito\Test\MockInterface;
 use Phockito\Test\MockMe;
+use Phockito\Test\MockMePhp70;
 use Phockito\Test\MockSubclass;
 use Phockito\Test\StubResponse;
 use Phockito\Test\VerificationFailure;
@@ -36,6 +37,22 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf(MockMe::class, $mock);
         $this->assertNull($mock->Foo());
         $this->assertNull($mock->Bar());
+    }
+
+    function testCanCreateBasicMockPhp70Class()
+    {
+        $mock = Phockito::mock(MockMePhp70::class);
+        $this->assertInstanceOf(MockMePhp70::class, $mock);
+        $this->assertEquals('', $mock->Foo());
+        $this->assertNotNull($mock->Bar());
+    }
+
+    function testCanCreateBasicMockPhp70Class2()
+    {
+        $mock = Phockito::mock(MockMePhp70::class);
+        when($mock->Bar())->thenReturn(new MockMe());
+
+        $this->assertNotNull($mock->Bar());
     }
 
     function testCanCreateMockOfChildClass()

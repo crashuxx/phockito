@@ -290,9 +290,12 @@ class Phockito
     {
         if (Proxy::isProxyClass($mock)) {
             $invocationHandler = Proxy::getInvocationHandler($mock);
-            /** @var LegacyMockInvocationHandler $invocationHandler */
 
-            return new LegacyWhenBuilder($invocationHandler->getPhockitoInstanceId(), $invocationHandler->getClazz()->getName());
+            // @fixme
+            if ($invocationHandler instanceof LegacyMockInvocationHandler || $invocationHandler instanceof LegacySpyInvocationHandler) {
+                /** @var LegacyMockInvocationHandler $invocationHandler */
+                return new LegacyWhenBuilder($invocationHandler->getPhockitoInstanceId(), $invocationHandler->getClazz()->getName());
+            }
         }
 
         /** @var LegacyInvocation $invocation */
