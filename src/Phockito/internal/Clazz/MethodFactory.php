@@ -35,8 +35,7 @@ class MethodFactory
 
         $modifiers = Reflection::getModifierNames($reflectionMethod->getModifiers());
 
-        // @fixme
-        if ($reflectionMethod->hasReturnType()) {
+        if (PHP_MAJOR_VERSION >= 7 && $reflectionMethod->hasReturnType()) {
             $type = $reflectionMethod->getReturnType();
             if ($type->isBuiltin()) {
                 $returnType = (string)$type;
