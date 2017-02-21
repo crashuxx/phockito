@@ -39,6 +39,9 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
         $this->assertNull($mock->Bar());
     }
 
+    /**
+     * @requires PHP 7.0
+     */
     function testCanCreateBasicMockPhp70Class()
     {
         $mock = Phockito::mock(MockMePhp70::class);
@@ -47,6 +50,9 @@ class PhockitoTest extends PHPUnit_Framework_TestCase
         $this->assertNotNull($mock->Bar());
     }
 
+    /**
+     * @requires PHP 7.0
+     */
     function testCanCreateBasicMockPhp70Class2()
     {
         $mock = Phockito::mock(MockMePhp70::class);
